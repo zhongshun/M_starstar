@@ -9,20 +9,33 @@ snap_distance = 0.05;
 
 
 %Read environment geometry from file
-environment = read_vertices_from_file('./Environments/Mstar_ED_edition.environment');
+environment = read_vertices_from_file('./Environments/M_starstar3.environment');
 
-Initial_Agent = [5;7];
-Initial_Opponent = [5;10];
+Initial_Agent = [1;5];
+Initial_Opponent = [1;7];
 Teammate = [10;7];
+%The frequency that the teammate appear
+Teammate_appear_mod = 6;
+
 Negtive_Reward = 1;
 Negtive_Teammate = 5;
 
-Lookahead = 3;
+Lookahead = 8;
 T = Lookahead;
+
+
+%The frquence
 Pr = 0.5;
+%E_them = bwarea(FirstPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* FirstPass.Nodes.Agent_Detection_time(list(j));
+%E_smart with pr
+%E_smart = bwarea(SecondPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* SecondPass.Nodes.Agent_Detection_time(list(j)) -Pr* Negtive_Teammate*(SecondPass.Nodes.Teammate_Detection_time_E_smart(list(j)) >= 1);
+%E_smaet with mod
+%E_smaet = bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Teammate*(ThirdPass.Nodes.Detection_time_E_smart(list(j)) >= 1);
+%E_us = bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Teammate*(ThirdPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
+
 
 %% Build the tree
-Tree = BuildMinimaxTree_BF(Initial_Agent,Initial_Opponent,Teammate,environment,Lookahead);
+Tree = BuildMinimaxTree_BF(Initial_Agent,Initial_Opponent,Teammate,environment,Teammate_appear_mod,Lookahead);
 
 %% First Pass
 FirstPass = Tree;
