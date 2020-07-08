@@ -17,26 +17,27 @@
 clear all; close all; clc;
 format long;
 
+load('Online.mat');
 
 %Robustness constant
-epsilon = 0.000000001;
+%epsilon = 0.000000001;
 
 
 %Snap distance (distance within which an observer location will be snapped to the
 %boundary before the visibility polygon is computed)
-snap_distance = 0.05;
+%snap_distance = 0.05;
 
 
 %Read environment geometry from file
-environment = read_vertices_from_file('./M_starstar3.environment');
+%environment = read_vertices_from_file('./M_starstar3.environment');
 % sensor_x = [2,3,4,5,6,6,6,6,7,8,9,10,11,11,11,11,11,11];
 % sensor_y =	[3,3,3,3,3,4,5,6,6,6,6,6,6,7,8,9,10,11];
 
 
 % environment_sensor = environment_sensor(sensor_x,sensor_y,environment);
 sensor_detect_indicator = [0 0 0 0];
-Negative_reward = 3;
-Negtive_Teammate1 = 4;
+%Negtive_Reward = 3;
+%Negtive_Teammate = 4;
 %Calculate a good plot window (bounding box) based on outer polygon of environment
 environment_min_x = min(environment{1}(:,1));
 environment_max_x = max(environment{1}(:,1));
@@ -76,11 +77,11 @@ end
 % sensor_x = [4,4,4,4,5,6,7,6,7,6,7,6,7];
 % sensor_y = [9,8,7,8,8,8,8,8,8,8,8,8,8];
 
-current_x = [5,4,3,2,1,1,1,2,3,3,3,4,5,6,7,8,8];
-current_y = [7,7,7,7,7,6,5,5,5,4,3,3,3,3,3,3,4];
+current_x = Record_path_Agent(1,:);     %[5,4,3,2,1,1,1,2,3,3,3,4,5,6,7,8,8];
+current_y = Record_path_Agent(2,:);     %[7,7,7,7,7,6,5,5,5,4,3,3,3,3,3,3,4];
 
-sensor_x =  [5, 5,5,5,4,3,2,1,1,1,1,1,1,1,1,1,1];
-sensor_y =  [10,9,8,7,7,7,7,7,6,5,4,5,6,7,6,5,4];
+sensor_x =  Record_path_Opponent(1,:);  %[5, 5,5,5,4,3,2,1,1,1,1,1,1,1,1,1,1];
+sensor_y =  Record_path_Opponent(2,:);  %[10,9,8,7,7,7,7,7,6,5,4,5,6,7,6,5,4];
 
 % current_x = [13,13,13,13,13,14,15,15];
 % current_y = [ 5, 6, 7, 8, 9, 9, 9,10];
@@ -165,7 +166,7 @@ for ii= 1: nnz(current_x)
         
         hold on
         
-        if mod(ii,6) == 2 
+        if mod(ii,Teammate_appear_mod) == 0
             plot3(Teammate1(1),Teammate1(2), 0.3 , ...
                 'p' , 'Markersize' , 16, 'MarkerFaceColor' , [0.9,0.8,0.7],'MarkerFaceColor','r','MarkerEdgeColor','r' );
 %             plot3(Teammate2(1),Teammate2(2), 0.3 , ...
@@ -241,8 +242,8 @@ for ii= 1: nnz(current_x)
 %         Teammate_detected3 = 0;
 %     end
     
-    Ne_Total = Ne_Total + Teammate_detect_indicator1(ii)*Negtive_Teammate1*discount_factor^sum(Teammate_detect_indicator1(1:ii));
-%     Total_reward_step(ii) = reward_step(ii)- Negative_reward*sum(sensor_detect_indicator(1:ii))- Teammate_detected1*Negtive_Teammate1 - Teammate_detected2*Negtive_Teammate1 - Teammate_detected3*Negtive_Teammate1;
+    Ne_Total = Ne_Total + Teammate_detect_indicator1(ii)*Negtive_Teammate*discount_factor^sum(Teammate_detect_indicator1(1:ii));
+%     Total_reward_step(ii) = reward_step(ii)- Negtive_Reward*sum(sensor_detect_indicator(1:ii))- Teammate_detected1*Negtive_Teammate - Teammate_detected2*Negtive_Teammate - Teammate_detected3*Negtive_Teammate;
 %     if ii == 1
 %         txt2 = ['Accumulated reward=',num2str(Total_reward_step(ii)), ', New Region Reward=',num2str(reward_step(ii))];
 %     else
@@ -253,13 +254,13 @@ for ii= 1: nnz(current_x)
 
     
     
-    txt3 = [ 'Penalty(Detected)=',num2str(Negative_reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=', num2str(Teammate_detect_indicator1(ii)*Negtive_Teammate1*discount_factor^sum(Teammate_detect_indicator1(1:ii)-1))];
+    txt3 = [ 'Penalty(Detected)=',num2str(Negtive_Reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=', num2str(Teammate_detect_indicator1(ii)*Negtive_Teammate*discount_factor^sum(Teammate_detect_indicator1(1:ii)-1))];
 %        if sum(Teammate_detect_indicator(1:ii-1)) > 0
-%              txt3 = [ 'Penalty(Detected)=',num2str(Negative_reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=0'];
+%              txt3 = [ 'Penalty(Detected)=',num2str(Negtive_Reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=0'];
        if Teammate_detect_indicator1(ii)== 1
-            txt3 = [ 'Penalty(Detected)=',num2str(Negative_reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=10'];
+            txt3 = [ 'Penalty(Detected)=',num2str(Negtive_Reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=10'];
        else
-            txt3 = [ 'Penalty(Detected)=',num2str(Negative_reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=0'];
+            txt3 = [ 'Penalty(Detected)=',num2str(Negtive_Reward*sensor_detect_indicator(ii)),', Penalty(Teammate)=0'];
        end
 %     text(X_MAX/2-5,Y_MAX - 1,txt3,'FontSize',8)
     hold off
@@ -295,6 +296,6 @@ for k = 1:ii
         Teammate_detected1 = 0;
     end
     
-    reward_step(k) = reward_step(k)- Negative_reward*sum(sensor_detect_indicator(1:k))- sum(Teammate_detect_indicator1)*Negtive_Teammate1;
+    reward_step(k) = reward_step(k)- Negtive_Reward*sum(sensor_detect_indicator(1:k))- sum(Teammate_detect_indicator1)*Negtive_Teammate;
 end
 
