@@ -141,7 +141,7 @@ for i = 2*T+1 :-1:1
         end
     elseif ~mod(i,2)
         for j = 1:nnz(list)
-            if ThirdPass.Nodes.Generation(list(j)) <= 4
+            if ThirdPass.Nodes.Wiseup(list(j)) == 1
                 ThirdPass.Nodes.Decision_Node(list(j)) = FirstPass.Nodes.Decision_Node(list(j));
                 ThirdPass.Nodes.Decision_Value(list(j)) = ThirdPass.Nodes.Decision_Value(ThirdPass.Nodes.Decision_Node(list(j)));
             else
