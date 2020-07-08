@@ -40,7 +40,97 @@ for step = 1:8
     %% Build the tree
     Tree = BuildMinimaxTree_Online(Initial_Agent,Initial_Opponent,step,Initial_Agent_Region,Teammate,environment,Teammate_appear_mod,Lookahead);
     
-    
+%     %% First Pass
+%     FirstPass = Tree;
+%     for i = 2*T+1 :-1:1
+%         list =  find(FirstPass.Nodes.Generation == i);
+%         if i == 2*T+1
+%             for j=1:nnz(list)
+%                 %             FirstPass.Nodes.Decision_Value(list(j)) =  distance([FirstPass.Nodes.Agent_x(list(j)) FirstPass.Nodes.Agent_y(list(j))],[FirstPass.Nodes.Opponent_x(list(j)) FirstPass.Nodes.Opponent_y(list(j))]);
+%                 FirstPass.Nodes.Decision_Value(list(j)) =  bwarea(FirstPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* FirstPass.Nodes.Agent_Detection_time(list(j));
+%                 FirstPass.Nodes.Decision_Node(list(j)) = list(j);
+%             end
+%         elseif ~mod(i,2)
+%             for j = 1:nnz(list)
+%                 Children_node = successors(FirstPass,list(j));
+%                 FirstPass.Nodes.Decision_Value(list(j)) = min(FirstPass.Nodes.Decision_Value(Children_node));
+%                 Best_value = FirstPass.Nodes.Decision_Value(list(j));
+%                 Best_node = intersect(Children_node,(find(FirstPass.Nodes.Generation == i+1 & FirstPass.Nodes.Decision_Value == Best_value)));
+%                 FirstPass.Nodes.Decision_Node(list(j)) = Best_node(1);
+%                 Best_one = 1;
+%                 for B = 1:nnz(Best_node)
+%                     if distance([FirstPass.Nodes.Agent_x(Best_node(B)),FirstPass.Nodes.Agent_y(Best_node(B))],[FirstPass.Nodes.Opponent_x(Best_node(B)),FirstPass.Nodes.Opponent_y(Best_node(B))])...
+%                             < distance([FirstPass.Nodes.Agent_x(Best_node(Best_one)),FirstPass.Nodes.Agent_y(Best_node(Best_one))],[FirstPass.Nodes.Opponent_x(Best_node(Best_one)),FirstPass.Nodes.Opponent_y(Best_node(Best_one))])
+%                         Best_one = B;
+%                     end
+%                 end
+%                 FirstPass.Nodes.Decision_Node(list(j)) = Best_node(Best_one);
+%             end
+%         else
+%             for j = 1:nnz(list)
+%                 Children_node = successors(FirstPass,list(j));
+%                 FirstPass.Nodes.Decision_Value(list(j)) = max(FirstPass.Nodes.Decision_Value(Children_node));
+%                 Best_value = FirstPass.Nodes.Decision_Value(list(j));
+%                 Best_node = intersect(Children_node,(find(FirstPass.Nodes.Generation == i+1 & FirstPass.Nodes.Decision_Value == Best_value)));
+%                 FirstPass.Nodes.Decision_Node(list(j)) = Best_node(1);
+%                 Best_one = 1;
+%                 for B = 1:nnz(Best_node)
+%                     if distance([FirstPass.Nodes.Agent_x(Best_node(B)),FirstPass.Nodes.Agent_y(Best_node(B))],[FirstPass.Nodes.Opponent_x(Best_node(B)),FirstPass.Nodes.Opponent_y(Best_node(B))])...
+%                             > distance([FirstPass.Nodes.Agent_x(Best_node(Best_one)),FirstPass.Nodes.Agent_y(Best_node(Best_one))],[FirstPass.Nodes.Opponent_x(Best_node(Best_one)),FirstPass.Nodes.Opponent_y(Best_node(Best_one))])
+%                         Best_one = B;
+%                     end
+%                 end
+%                 FirstPass.Nodes.Decision_Node(list(j)) = Best_node(Best_one);
+%             end
+%         end
+%         
+%     end
+%     
+%     %% Second Pass
+%     SecondPass = Tree;
+%     for i = 2*T+1 :-1:1
+%         list =  find(SecondPass.Nodes.Generation == i);
+%         if i == 2*T+1
+%             for j=1:nnz(list)
+%                 %             SecondPass.Nodes.Decision_Value(list(j)) =  distance([SecondPass.Nodes.Agent_x(list(j)) SecondPass.Nodes.Agent_y(list(j))],[SecondPass.Nodes.Opponent_x(list(j)) SecondPass.Nodes.Opponent_y(list(j))]);
+%                 SecondPass.Nodes.Decision_Value(list(j)) =  bwarea(SecondPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* SecondPass.Nodes.Agent_Detection_time(list(j)) -Pr* Negtive_Teammate*(SecondPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
+%                 SecondPass.Nodes.Decision_Node(list(j)) = list(j);
+%             end
+%         elseif ~mod(i,2)
+%             for j = 1:nnz(list)
+%                 Children_node = successors(SecondPass,list(j));
+%                 SecondPass.Nodes.Decision_Value(list(j)) = min(SecondPass.Nodes.Decision_Value(Children_node));
+%                 Best_value = SecondPass.Nodes.Decision_Value(list(j));
+%                 Best_node = intersect(Children_node,(find(SecondPass.Nodes.Generation == i+1 & SecondPass.Nodes.Decision_Value == Best_value)));
+%                 SecondPass.Nodes.Decision_Node(list(j)) = Best_node(1);
+%                 Best_one = 1;
+%                 for B = 1:nnz(Best_node)
+%                     if distance([SecondPass.Nodes.Agent_x(Best_node(B)),SecondPass.Nodes.Agent_y(Best_node(B))],[SecondPass.Nodes.Opponent_x(Best_node(B)),SecondPass.Nodes.Opponent_y(Best_node(B))])...
+%                             < distance([SecondPass.Nodes.Agent_x(Best_node(Best_one)),SecondPass.Nodes.Agent_y(Best_node(Best_one))],[SecondPass.Nodes.Opponent_x(Best_node(Best_one)),SecondPass.Nodes.Opponent_y(Best_node(Best_one))])
+%                         Best_one = B;
+%                     end
+%                 end
+%                 SecondPass.Nodes.Decision_Node(list(j)) = Best_node(Best_one);
+%             end
+%         else
+%             for j = 1:nnz(list)
+%                 Children_node = successors(SecondPass,list(j));
+%                 SecondPass.Nodes.Decision_Value(list(j)) = max(SecondPass.Nodes.Decision_Value(Children_node));
+%                 Best_value = SecondPass.Nodes.Decision_Value(list(j));
+%                 Best_node = intersect(Children_node,(find(SecondPass.Nodes.Generation == i+1 & SecondPass.Nodes.Decision_Value == Best_value)));
+%                 SecondPass.Nodes.Decision_Node(list(j)) = Best_node(1);
+%                 Best_one = 1;
+%                 for B = 1:nnz(Best_node)
+%                     if distance([SecondPass.Nodes.Agent_x(Best_node(B)),SecondPass.Nodes.Agent_y(Best_node(B))],[SecondPass.Nodes.Opponent_x(Best_node(B)),SecondPass.Nodes.Opponent_y(Best_node(B))])...
+%                             > distance([SecondPass.Nodes.Agent_x(Best_node(Best_one)),SecondPass.Nodes.Agent_y(Best_node(Best_one))],[SecondPass.Nodes.Opponent_x(Best_node(Best_one)),SecondPass.Nodes.Opponent_y(Best_node(Best_one))])
+%                         Best_one = B;
+%                     end
+%                 end
+%                 SecondPass.Nodes.Decision_Node(list(j)) = Best_node(Best_one);
+%             end
+%         end
+%         
+%     end
     %% Third Pass
     ThirdPass = Tree;
     for i = 2*T+1 :-1:1
