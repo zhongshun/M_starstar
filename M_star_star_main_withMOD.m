@@ -20,7 +20,7 @@ Teammate_appear_mod = 6;
 Negtive_Reward = 1;
 Negtive_Teammate = 5;
 
-Lookahead = 8;
+Lookahead = 2;  % was 8
 T = Lookahead;
 
 
