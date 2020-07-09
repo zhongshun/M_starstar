@@ -4,7 +4,7 @@
 %Input 1. Agent position; 2. Opponent position; 3. Current step; 4. Scanned
 %region; 5. Teammate position; 6. environment vector. 7. Teammate appear
 %mode; 8. Lookahead steps
-function Vis = BuildMinimaxTree_Online(Initial_Agent,Initial_Opponent,Initial_Generation,Agent_Region,Teammate,environment,Teammate_appear_mod,Lookahead,ENV_SIZE)
+function Vis = BuildMinimaxTree_Online(Initial_Agent,Initial_Opponent,Initial_Generation,Agent_Region,Teammate,environment,Teammate_appear_mod,Teammate_appear_mod_E_smart,Lookahead,ENV_SIZE)
 
 epsilon = 0.01;
 snap_distance = 0.05;
@@ -55,7 +55,7 @@ New_End = 1;
 Count = 1;
 
 % Teammate_appear_mod_E_smart = 3;
-Teammate_appear_mod_E_smart = Teammate_appear_mod;
+% Teammate_appear_mod_E_smart = Teammate_appear_mod;
 
 environment_min_x = min(environment{1}(:,1));
 environment_max_x = max(environment{1}(:,1));
@@ -73,9 +73,7 @@ for i = 2:2*T+1
             if j == Initial_node
                 New_Initial = Count+1;
             end
-            if Count == 2322
-                a = 1
-            end
+
             %x forward
             if in_environment( [Vis.Nodes.Agent_x(j)+1, Vis.Nodes.Agent_y(j)] , environment , 0.01 ) &&...
                    in_environment( [Vis.Nodes.Agent_x(j)+1/2, Vis.Nodes.Agent_y(j)] , environment , 0.01 ) 
@@ -187,7 +185,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j);
                 end
 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 0
                     Vis.Nodes.WiseUp(Count+1) = 1;
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j) + 1;
                 else
@@ -195,7 +193,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j);
                 end
                 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 0
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j) + 1;
                 else
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j);
@@ -223,7 +221,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j);
                 end
 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) && mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) && mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 0
                     Vis.Nodes.WiseUp(Count+1) = 1;
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j) + 1;
                 else
@@ -232,7 +230,7 @@ for i = 2:2*T+1
                 end
                 
                 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 0
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j) + 1;
                 else
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j);
@@ -259,7 +257,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j);
                 end
 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) && mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) && mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 0
                     Vis.Nodes.WiseUp(Count+1) = 1;
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j) + 1;
                 else
@@ -267,7 +265,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j);
                 end
                 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 0
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j) + 1;
                 else
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j);
@@ -295,7 +293,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j);
                 end
 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) && mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) && mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 0
                     Vis.Nodes.WiseUp(Count+1) = 1;
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j) + 1;
                 else
@@ -303,7 +301,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j);
                 end
                 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 0
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j) + 1;
                 else
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j);
@@ -329,7 +327,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j);
                 end
                 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod) == 0
                     Vis.Nodes.WiseUp(Count+1) = 1;
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j) + 1;
                 else
@@ -337,7 +335,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Teammate_Detection_time(Count+1) = Vis.Nodes.Teammate_Detection_time(j);
                 end
                 
-                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 1
+                if in_environment( [Teammate(1) Teammate(2)] , W , epsilon ) &&  mod(Current_step + Initial_Generation -1,Teammate_appear_mod_E_smart) == 0
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j) + 1;
                 else
                     Vis.Nodes.Teammate_Detection_time_E_smart(Count+1) = Vis.Nodes.Teammate_Detection_time_E_smart(j);

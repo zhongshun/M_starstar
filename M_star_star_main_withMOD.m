@@ -55,9 +55,10 @@ for i = 2*T+1 :-1:1
             Best_node = intersect(Children_node,(find(FirstPass.Nodes.Generation == i+1 & FirstPass.Nodes.Decision_Value == Best_value)));            
             FirstPass.Nodes.Decision_Node(list(j)) = Best_node(1);
             Best_one = 1;
+            ParentOfB = SecondPass.Nodes.Parent(list(j));
             for B = 1:nnz(Best_node)
-                if distance([FirstPass.Nodes.Agent_x(Best_node(B)),FirstPass.Nodes.Agent_y(Best_node(B))],[FirstPass.Nodes.Opponent_x(Best_node(B)),FirstPass.Nodes.Opponent_y(Best_node(B))])...
-                        < distance([FirstPass.Nodes.Agent_x(Best_node(Best_one)),FirstPass.Nodes.Agent_y(Best_node(Best_one))],[FirstPass.Nodes.Opponent_x(Best_node(Best_one)),FirstPass.Nodes.Opponent_y(Best_node(Best_one))])
+                if distance([FirstPass.Nodes.Agent_x(ParentOfB),FirstPass.Nodes.Agent_y(ParentOfB)],[FirstPass.Nodes.Opponent_x(Best_node(B)),FirstPass.Nodes.Opponent_y(Best_node(B))])...
+                        < distance([FirstPass.Nodes.Agent_x(ParentOfB),FirstPass.Nodes.Agent_y(ParentOfB)],[FirstPass.Nodes.Opponent_x(Best_node(Best_one)),FirstPass.Nodes.Opponent_y(Best_node(Best_one))])
                     Best_one = B;
                 end
             end
@@ -101,9 +102,10 @@ for i = 2*T+1 :-1:1
             Best_node = intersect(Children_node,(find(SecondPass.Nodes.Generation == i+1 & SecondPass.Nodes.Decision_Value == Best_value)));            
             SecondPass.Nodes.Decision_Node(list(j)) = Best_node(1);
             Best_one = 1;
+            ParentOfB = SecondPass.Nodes.Parent(list(j));
             for B = 1:nnz(Best_node)
-                if distance([SecondPass.Nodes.Agent_x(Best_node(B)),SecondPass.Nodes.Agent_y(Best_node(B))],[SecondPass.Nodes.Opponent_x(Best_node(B)),SecondPass.Nodes.Opponent_y(Best_node(B))])...
-                        < distance([SecondPass.Nodes.Agent_x(Best_node(Best_one)),SecondPass.Nodes.Agent_y(Best_node(Best_one))],[SecondPass.Nodes.Opponent_x(Best_node(Best_one)),SecondPass.Nodes.Opponent_y(Best_node(Best_one))])
+                if distance([SecondPass.Nodes.Agent_x(ParentOfB),SecondPass.Nodes.Agent_y(ParentOfB)],[SecondPass.Nodes.Opponent_x(Best_node(B)),SecondPass.Nodes.Opponent_y(Best_node(B))])...
+                        < distance([SecondPass.Nodes.Agent_x(ParentOfB),SecondPass.Nodes.Agent_y(ParentOfB)],[SecondPass.Nodes.Opponent_x(Best_node(Best_one)),SecondPass.Nodes.Opponent_y(Best_node(Best_one))])
                     Best_one = B;
                 end
             end
@@ -116,7 +118,7 @@ for i = 2*T+1 :-1:1
             Best_value = SecondPass.Nodes.Decision_Value(list(j));
             Best_node = intersect(Children_node,(find(SecondPass.Nodes.Generation == i+1 & SecondPass.Nodes.Decision_Value == Best_value)));
             SecondPass.Nodes.Decision_Node(list(j)) = Best_node(1);
-            Best_one = 1;
+            Best_one = 1;          
             for B = 1:nnz(Best_node)
                 if distance([SecondPass.Nodes.Agent_x(Best_node(B)),SecondPass.Nodes.Agent_y(Best_node(B))],[SecondPass.Nodes.Opponent_x(Best_node(B)),SecondPass.Nodes.Opponent_y(Best_node(B))])...
                         > distance([SecondPass.Nodes.Agent_x(Best_node(Best_one)),SecondPass.Nodes.Agent_y(Best_node(Best_one))],[SecondPass.Nodes.Opponent_x(Best_node(Best_one)),SecondPass.Nodes.Opponent_y(Best_node(Best_one))])
