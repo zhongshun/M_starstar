@@ -4,7 +4,7 @@
 %Input 1. Agent position; 2. Opponent position; 3. Current step; 4. Scanned
 %region; 5. Teammate position; 6. environment vector. 7. Teammate appear
 %mode; 8. Lookahead steps
-function Vis = BuildMinimaxTree_Online(Initial_Agent,Initial_Opponent,Initial_Generation,Agent_Region,Teammate,environment,Teammate_appear_mod,Teammate_appear_mod_E_smart,Lookahead,ENV_SIZE)
+function Vis = BuildMinimaxTree_Online(Initial_Agent,Initial_Opponent,Initial_Generation,Agent_Region,Teammate,environment,Teammate_appear_mod,Teammate_appear_mod_E_smart,WiseUp,Lookahead,ENV_SIZE)
 
 epsilon = 0.01;
 snap_distance = 0.05;
@@ -21,7 +21,7 @@ Vis.Nodes.Detection_time = 0;
 Vis.Nodes.Detection_time_E_smart = 0;
 
 
-Vis.Nodes.WiseUp = 0;
+Vis.Nodes.WiseUp = WiseUp;
 
 % if Initial_Generation == 1
 %     V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);

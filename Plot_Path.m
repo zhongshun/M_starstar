@@ -272,8 +272,8 @@ for ii= 1: nnz(current_x)
         a = 1
     end
     %sensor the next point
-%     fname = sprintf('myfile%d.png', ii);
-%     saveas(gcf,fname)
+    fname = sprintf('myfile%d.png', ii);
+    saveas(gcf,fname)
 %     
     
 end

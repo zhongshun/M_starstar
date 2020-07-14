@@ -10,24 +10,26 @@ snap_distance = 0.05;
 ENV_SIZE = 50;  % will be ENV_SIZE x ENV_SIZE grid
 
 %Read environment geometry from file
-environment = read_vertices_from_file('./Environments/M_starstar4.environment');
+environment = read_vertices_from_file('./Environments/M_starstar5.environment');
 
-Initial_Agent = [4;7];
-Initial_Opponent = [5;10];
-Teammate = [10;7];
+Initial_Agent = [3;7];
+Initial_Opponent = [5;7];
+Teammate = [7;7];
 %The frequency that the teammate appear
 Record_path_Agent = Initial_Agent;
 Record_path_Opponent = Initial_Opponent;
 
-Teammate_appear_mod = 2;
+Teammate_appear_mod = 4;
+Teammate_appear_mod_E_smart = 4;
 
 Negtive_Reward = 1;
-Negtive_Teammate = 3;
+Negtive_Teammate = 5;
+WiseUp
 
 Lookahead = 4;
 T = Lookahead;
 
-T_execution = 10;       % how many time steps to execute the online planner
+T_execution = 15;       % how many time steps to execute the online planner
 
 V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);
 Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),ENV_SIZE, ENV_SIZE);
@@ -42,8 +44,8 @@ Pr = 0.5;
 for step = 1:T_execution
     
     %% Build the tree
-    Tree = BuildMinimaxTree_Online(Initial_Agent,Initial_Opponent,step,Initial_Agent_Region,Teammate,environment,Teammate_appear_mod,Lookahead,ENV_SIZE);
-    [Initial_Agent, Initial_Opponent, Initial_Agent_Region] = RunThreePasses(Tree,T,Negtive_Reward,Negtive_Teammate,Pr);
+    Tree = BuildMinimaxTree_Online(Initial_Agent,Initial_Opponent,step,Initial_Agent_Region,Teammate,environment,Teammate_appear_mod,Teammate_appear_mod_E_smart,Lookahead,ENV_SIZE);
+    [Initial_Agent, Initial_Opponent, Initial_Agent_Region,WiseUp] = RunThreePasses(Tree,T,Negtive_Reward,Negtive_Teammate,Pr);
     
     Record_path_Agent(:,step + 1) = Initial_Agent
     Record_path_Opponent(:,step + 1) = Initial_Opponent

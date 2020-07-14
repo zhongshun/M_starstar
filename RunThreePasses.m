@@ -1,4 +1,4 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region] = RunThreePasses(Tree,T,Negtive_Reward,Negtive_Teammate,Pr)
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region, WiseUp] = RunThreePasses(Tree,T,Negtive_Reward,Negtive_Teammate,Pr)
 
 E_them = @them_eval_fn;
 E_us = @true_eval_fn;
@@ -160,4 +160,5 @@ end
 Initial_Agent = [Agent_path_x(2);Agent_path_y(2)];
 Initial_Opponent = [Opponent_path_x(2);Opponent_path_y(2)];
 Initial_Agent_Region = ThirdPass.Nodes.Agent_Region{ThirdPass_Node_path(3)};
+WiseUp = ThirdPass.Nodes.WiseUp(ThirdPass_Node_path(3));
 a = 1;
