@@ -60,7 +60,7 @@ environment_max_x = max(environment{1}(:,1));
 environment_min_y = min(environment{1}(:,2));
 environment_max_y = max(environment{1}(:,2));
 
-Action_Space = [1 0;0 1;-1 0; 0 -1];
+Action_Space = [1 0;0 1;-1 0; 0 -1;0 0];
 
 for i = 2:2*T+1
     Current_step = ceil(i/2);

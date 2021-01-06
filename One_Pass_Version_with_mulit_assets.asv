@@ -15,8 +15,8 @@ environment = read_vertices_from_file('./Environments/M_starstar6.environment');
 Initial_Agent = [2;7];
 Initial_Opponent = [5;7];
 
-Asset_Position = [7 7; 6 7;5 11];
-% Asset_Position = [5 11];
+% Asset_Position = [7 7; 6 7;5 11];
+Asset_Position = [5 11];
 %The frequency that the Asset appear
 Asset_appear_mod = 1;
 
@@ -140,14 +140,11 @@ for i = 2*T+1 :-1:1
            Best_node = Best_nodes(1);
 
            if nnz(Best_nodes) > 1 
-               for k = 1:nnz(Children_node)
-                   if One_Pass.Nodes.Agent_x(i) == One_Pass.Nodes.Agent_x(Children_node(k)) &&...
-                           One_Pass.Nodes.Agent_y(i) == One_Pass.Nodes.Agent_y(Children_node(k))
-                       Best_node = Best_nodes(k);
-                       break
-                   else
-                       Best_node = Best_nodes(randi([1,nnz(Best_nodes)]));
-                   end
+                fo
+               if One_Pass.Nodes.Agent_x(i) == One_Pass.Nodes.Agent_x(i) && One_Pass.Nodes.Agent_y(Best_nodes(B))
+                   
+               else
+                    Best_node = Best_nodes(randi([1,nnz(Best_nodes)])); 
                end
            else
                Best_node = Best_nodes;
