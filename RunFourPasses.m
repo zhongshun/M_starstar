@@ -1,41 +1,8 @@
-clear all; close all; clc;
-%Robustness constant
-epsilon = 0.000000001;
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region, WiseUp] = RunThreePasses(Tree,T,Negtive_Reward,Negtive_Teammate,Pr)
 
-
-%Snap distance (distance within which an observer location will be snapped to the
-%boundary before the visibility polygon is computed)
-snap_distance = 0.05;
-
-
-%Read environment geometry from file
-environment = read_vertices_from_file('./Environments/M_starstar6.environment');
-
-Initial_Agent = [2;7];
-Initial_Opponent = [3;8];
-Teammate = [7;7];
-%The frequency that the teammate appear
-Teammate_appear_mod = 2;
-
-Negtive_Reward = 1;
-Negtive_Teammate = 5;
-
-Lookahead = 3;  % was 8
-T = Lookahead;
-
-
-%The frquence
-Pr = 0.5;
-%E_them = bwarea(FirstPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* FirstPass.Nodes.Agent_Detection_time(list(j));
-%E_smart with pr
-%E_smart = bwarea(SecondPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* SecondPass.Nodes.Agent_Detection_time(list(j)) -Pr* Negtive_Teammate*(SecondPass.Nodes.Teammate_Detection_time_E_smart(list(j)) >= 1);
-%E_smaet with mod
-%E_smaet = bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Teammate*(ThirdPass.Nodes.Detection_time_E_smart(list(j)) >= 1);
-%E_us = bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Teammate*(ThirdPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
-
-
-%% Build the tree
-Tree = BuildMinimaxTree_BF(Initial_Agent,Initial_Opponent,Teammate,environment,Teammate_appear_mod,Lookahead);
+E_them = @them_eval_fn;
+E_us = @true_eval_fn;
+E_smart = @true_eval_fn;
 
 %% First Pass
 FirstPass = Tree;
@@ -43,8 +10,9 @@ for i = 2*T+1 :-1:1
     list =  find(FirstPass.Nodes.Generation == i);
     if i == 2*T+1
         for j=1:nnz(list)
-%             FirstPass.Nodes.Decision_Value(list(j)) =  distance([FirstPass.Nodes.Agent_x(list(j)) FirstPass.Nodes.Agent_y(list(j))],[FirstPass.Nodes.Opponent_x(list(j)) FirstPass.Nodes.Opponent_y(list(j))]);
-            FirstPass.Nodes.Decision_Value(list(j)) =  bwarea(FirstPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* FirstPass.Nodes.Agent_Detection_time(list(j));
+            %             FirstPass.Nodes.Decision_Value(list(j)) =  distance([FirstPass.Nodes.Agent_x(list(j)) FirstPass.Nodes.Agent_y(list(j))],[FirstPass.Nodes.Opponent_x(list(j)) FirstPass.Nodes.Opponent_y(list(j))]);
+            %FirstPass.Nodes.Decision_Value(list(j)) =  bwarea(FirstPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* FirstPass.Nodes.Agent_Detection_time(list(j));
+            FirstPass.Nodes.Decision_Value(list(j)) =  E_them(bwarea(FirstPass.Nodes.Agent_Region{list(j)}), FirstPass.Nodes.Agent_Detection_time(list(j)), FirstPass.Nodes.Teammate_Detection_time(list(j)), Negtive_Reward, Negtive_Teammate, Pr);
             FirstPass.Nodes.Decision_Node(list(j)) = list(j);
         end
     elseif ~mod(i,2)
@@ -52,7 +20,7 @@ for i = 2*T+1 :-1:1
             Children_node = successors(FirstPass,list(j));
             FirstPass.Nodes.Decision_Value(list(j)) = min(FirstPass.Nodes.Decision_Value(Children_node));
             Best_value = FirstPass.Nodes.Decision_Value(list(j));
-            Best_node = intersect(Children_node,(find(FirstPass.Nodes.Generation == i+1 & FirstPass.Nodes.Decision_Value == Best_value)));            
+            Best_node = intersect(Children_node,(find(FirstPass.Nodes.Generation == i+1 & FirstPass.Nodes.Decision_Value == Best_value)));
             FirstPass.Nodes.Decision_Node(list(j)) = Best_node(1);
             Best_one = 1;
             ParentOfB = FirstPass.Nodes.Parent(list(j));
@@ -90,8 +58,9 @@ for i = 2*T+1 :-1:1
     list =  find(SecondPass.Nodes.Generation == i);
     if i == 2*T+1
         for j=1:nnz(list)
-%             SecondPass.Nodes.Decision_Value(list(j)) =  distance([SecondPass.Nodes.Agent_x(list(j)) SecondPass.Nodes.Agent_y(list(j))],[SecondPass.Nodes.Opponent_x(list(j)) SecondPass.Nodes.Opponent_y(list(j))]);
-            SecondPass.Nodes.Decision_Value(list(j)) =  bwarea(SecondPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* SecondPass.Nodes.Agent_Detection_time(list(j)) -Pr* Negtive_Teammate*(SecondPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
+            %             SecondPass.Nodes.Decision_Value(list(j)) =  distance([SecondPass.Nodes.Agent_x(list(j)) SecondPass.Nodes.Agent_y(list(j))],[SecondPass.Nodes.Opponent_x(list(j)) SecondPass.Nodes.Opponent_y(list(j))]);
+            %SecondPass.Nodes.Decision_Value(list(j)) =  bwarea(SecondPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* SecondPass.Nodes.Agent_Detection_time(list(j)) -Pr* Negtive_Teammate*(SecondPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
+            SecondPass.Nodes.Decision_Value(list(j)) =  E_smart(bwarea(SecondPass.Nodes.Agent_Region{list(j)}), SecondPass.Nodes.Agent_Detection_time(list(j)), SecondPass.Nodes.Teammate_Detection_time_E_smart(list(j)), Negtive_Reward, Negtive_Teammate, Pr);
             SecondPass.Nodes.Decision_Node(list(j)) = list(j);
         end
     elseif ~mod(i,2)
@@ -99,7 +68,7 @@ for i = 2*T+1 :-1:1
             Children_node = successors(SecondPass,list(j));
             SecondPass.Nodes.Decision_Value(list(j)) = min(SecondPass.Nodes.Decision_Value(Children_node));
             Best_value = SecondPass.Nodes.Decision_Value(list(j));
-            Best_node = intersect(Children_node,(find(SecondPass.Nodes.Generation == i+1 & SecondPass.Nodes.Decision_Value == Best_value)));            
+            Best_node = intersect(Children_node,(find(SecondPass.Nodes.Generation == i+1 & SecondPass.Nodes.Decision_Value == Best_value)));
             SecondPass.Nodes.Decision_Node(list(j)) = Best_node(1);
             Best_one = 1;
             ParentOfB = SecondPass.Nodes.Parent(list(j));
@@ -118,7 +87,7 @@ for i = 2*T+1 :-1:1
             Best_value = SecondPass.Nodes.Decision_Value(list(j));
             Best_node = intersect(Children_node,(find(SecondPass.Nodes.Generation == i+1 & SecondPass.Nodes.Decision_Value == Best_value)));
             SecondPass.Nodes.Decision_Node(list(j)) = Best_node(1);
-            Best_one = 1;          
+            Best_one = 1;
             for B = 1:nnz(Best_node)
                 if distance([SecondPass.Nodes.Agent_x(Best_node(B)),SecondPass.Nodes.Agent_y(Best_node(B))],[SecondPass.Nodes.Opponent_x(Best_node(B)),SecondPass.Nodes.Opponent_y(Best_node(B))])...
                         > distance([SecondPass.Nodes.Agent_x(Best_node(Best_one)),SecondPass.Nodes.Agent_y(Best_node(Best_one))],[SecondPass.Nodes.Opponent_x(Best_node(Best_one)),SecondPass.Nodes.Opponent_y(Best_node(Best_one))])
@@ -130,15 +99,15 @@ for i = 2*T+1 :-1:1
     end
     
 end
-
 %% Third Pass
 ThirdPass = Tree;
 for i = 2*T+1 :-1:1
     list =  find(ThirdPass.Nodes.Generation == i);
     if i == 2*T+1
         for j=1:nnz(list)
-%             ThirdPass.Nodes.Decision_Value(list(j)) =  distance([ThirdPass.Nodes.Agent_x(list(j)) ThirdPass.Nodes.Agent_y(list(j))],[ThirdPass.Nodes.Opponent_x(list(j)) ThirdPass.Nodes.Opponent_y(list(j))]);
-            ThirdPass.Nodes.Decision_Value(list(j)) =  bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Teammate*(ThirdPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
+            %             ThirdPass.Nodes.Decision_Value(list(j)) =  distance([ThirdPass.Nodes.Agent_x(list(j)) ThirdPass.Nodes.Agent_y(list(j))],[ThirdPass.Nodes.Opponent_x(list(j)) ThirdPass.Nodes.Opponent_y(list(j))]);
+            %ThirdPass.Nodes.Decision_Value(list(j)) =  bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Teammate*(ThirdPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
+            ThirdPass.Nodes.Decision_Value(list(j)) =  E_us(bwarea(ThirdPass.Nodes.Agent_Region{list(j)}), ThirdPass.Nodes.Agent_Detection_time(list(j)), ThirdPass.Nodes.Teammate_Detection_time(list(j)), Negtive_Reward, Negtive_Teammate, Pr);
             ThirdPass.Nodes.Decision_Node(list(j)) = list(j);
         end
     elseif ~mod(i,2)
@@ -167,15 +136,44 @@ for i = 2*T+1 :-1:1
             end
             ThirdPass.Nodes.Decision_Node(list(j)) = Best_node(Best_one);
         end
-    end 
+    end
 end
 
-% %find the optimal path
-FirstPass_Node_path = 1;
-FirstPass_Best_node = 1;
-for i = 2:2*T+1
-    FirstPass_Best_node = FirstPass.Nodes.Decision_Node(FirstPass_Best_node);
-    FirstPass_Node_path = [FirstPass_Node_path FirstPass_Best_node];
+
+%% Four Pass
+FourPass = Tree;
+for i = 2*T+1 :-1:1
+    list =  find(FourPass.Nodes.Generation == i);
+    if i == 2*T+1
+        for j=1:nnz(list)
+            %             ThirdPass.Nodes.Decision_Value(list(j)) =  distance([ThirdPass.Nodes.Agent_x(list(j)) ThirdPass.Nodes.Agent_y(list(j))],[ThirdPass.Nodes.Opponent_x(list(j)) ThirdPass.Nodes.Opponent_y(list(j))]);
+            %ThirdPass.Nodes.Decision_Value(list(j)) =  bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Teammate*(ThirdPass.Nodes.Teammate_Detection_time(list(j)) >= 1);
+            FourPass.Nodes.Decision_Value(list(j)) =  E_us(bwarea(FourPass.Nodes.Agent_Region{list(j)}), FourPass.Nodes.Agent_Detection_time(list(j)), FourPass.Nodes.Teammate_Detection_time(list(j)), Negtive_Reward, Negtive_Teammate, Pr);
+            FourPass.Nodes.Decision_Node(list(j)) = list(j);
+        end
+    elseif ~mod(i,2)
+        for j = 1:nnz(list)
+            Children_node = successors(FourPass,list(j));
+            FourPass.Nodes.Decision_Value(list(j)) = min(FourPass.Nodes.Decision_Value(Children_node));
+            Best_value = FourPass.Nodes.Decision_Value(list(j));
+            Best_node = intersect(Children_node,(find(FourPass.Nodes.Generation == i+1 & FourPass.Nodes.Decision_Value == Best_value)));
+            FourPass.Nodes.Decision_Node(list(j)) = Best_node(1);
+            Best_one = 1;
+            ParentOfB = FourPass.Nodes.Parent(list(j));
+            for B = 1:nnz(Best_node)
+                if distance([FourPass.Nodes.Agent_x(ParentOfB),FourPass.Nodes.Agent_y(ParentOfB)],[FourPass.Nodes.Opponent_x(Best_node(B)),FourPass.Nodes.Opponent_y(Best_node(B))])...
+                        < distance([FourPass.Nodes.Agent_x(ParentOfB),FourPass.Nodes.Agent_y(ParentOfB)],[FourPass.Nodes.Opponent_x(Best_node(Best_one)),FourPass.Nodes.Opponent_y(Best_node(Best_one))])
+                    Best_one = B;
+                end
+            end
+            FourPass.Nodes.Decision_Node(list(j)) = Best_node(Best_one);
+        end
+    else
+        for j = 1:nnz(list)
+            FourPass.Nodes.Decision_Node(list(j)) = SecondPass.Nodes.Decision_Node(list(j));
+            FourPass.Nodes.Decision_Value(list(j)) = FourPass.Nodes.Decision_Value(FourPass.Nodes.Decision_Node(list(j)));
+        end
+    end
 end
 
 % %find the optimal path
@@ -184,6 +182,13 @@ ThirdPass_Best_node = 1;
 for i = 2:2*T+1
     ThirdPass_Best_node = ThirdPass.Nodes.Decision_Node(ThirdPass_Best_node);
     ThirdPass_Node_path = [ThirdPass_Node_path ThirdPass_Best_node];
+end
+
+FourPass_Node_path = 1;
+FourPass_Best_node = 1;
+for i = 2:2*T+1
+    FourPass_Best_node = FourPass.Nodes.Decision_Node(FourPass_Best_node);
+    FourPass_Node_path = [FourPass_Node_path FourPass_Best_node];
 end
 
 for k =1:2*T+1
@@ -196,7 +201,17 @@ for k =1:2*T+1
     end
 end
 
+for k =1:2*T+1
+    if mod(k,2)
+        continue
+    else
+        Opponent_path_x(k/2) = FourPass.Nodes.Opponent_x(ThirdPass_Node_path(k));
+        Opponent_path_y(k/2) = FourPass.Nodes.Opponent_y(ThirdPass_Node_path(k));
+    end
+end
 
-
-% Agent_next = [Vis.Nodes.Agent_x(Node_path(2)); Vis.Nodes.Agent_y(Node_path(2))];
-% Opponent_next = [Vis.Nodes.Opponent_x(Node_path(3)); Vis.Nodes.Opponent_y(Node_path(3))];
+Initial_Agent = [Agent_path_x(2);Agent_path_y(2)];
+Initial_Opponent = [Opponent_path_x(2);Opponent_path_y(2)];
+Initial_Agent_Region = ThirdPass.Nodes.Agent_Region{ThirdPass_Node_path(3)};
+WiseUp = ThirdPass.Nodes.WiseUp(ThirdPass_Node_path(3));
+a = 1;
