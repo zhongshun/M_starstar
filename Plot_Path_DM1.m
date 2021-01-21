@@ -230,13 +230,14 @@ for ii= 1: max(size(current_x))
         text(X_MIN+4,Y_MAX+1,txt5,'FontSize',20)
         
         CurrentPenalty = 0;
-    end
+    
     
     plot3(sensor_x(1:ii-1),sensor_y(1:ii-1),0.1*ones( max(size(sensor_x(1:ii-1))) , 1 ),'b','LineWidth',5)
     plot3(sensor_x(ii-1:ii),sensor_y(ii-1:ii),0.1*ones( max(size(sensor_x(ii-1:ii))) , 1 ),':b','LineWidth',5)
     plot3(current_x(1:ii-1),current_y(1:ii-1),0.1*ones( max(size(current_x(1:ii-1))) , 1 ),'r','LineWidth',5)
     plot3(current_x(ii-1:ii),current_y(ii-1:ii),0.1*ones( max(size(current_x(ii-1:ii))) , 1 ),':r','LineWidth',5)
     pause(0.1)
+    end
     hold off
     %
          mov(ii) = getframe(gca);
