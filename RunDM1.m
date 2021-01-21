@@ -51,6 +51,7 @@ for i = 2*T+1 :-1:1
            %Find the minimal value based on the wise up state of the
            %opponent 
            Best_nodes = [];
+           P = list(j);
            for k = 1:nnz(Children_node)           
                 if One_Pass.Nodes.E_them{Children_node(k)}(Decision_Index_E_them) == Best_value
                     Best_nodes(nnz(Best_nodes) + 1) = Children_node(k);
@@ -58,10 +59,15 @@ for i = 2*T+1 :-1:1
            end
            Best_node = Best_nodes(1);
            % get the minimal reward for current step
-           if nnz(Best_nodes) > 1 
+           if nnz(Best_nodes) > 1
                Best_one = 1;
                for B = 1:nnz(Best_nodes)
-                   if One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) < One_Pass.Nodes.Current_Step_reward(Best_nodes(Best_one)) 
+                   
+                   if One_Pass.Nodes.Opponent_x(Best_nodes(B)) == One_Pass.Nodes.Agent_x(P) &&...
+                           One_Pass.Nodes.Opponent_y(Best_nodes(B)) == One_Pass.Nodes.Agent_y(P)
+                       Best_one = B;
+                       break
+                   elseif One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) < One_Pass.Nodes.Current_Step_reward(Best_nodes(Best_one))
                        Best_one = B;
                    end
                end

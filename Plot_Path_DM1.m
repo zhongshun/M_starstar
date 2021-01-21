@@ -102,7 +102,9 @@ for k = 1:size(Asset,1)
         'p' , 'Markersize' , 16, 'MarkerFaceColor' , [0.9,0.8,0.7],'MarkerFaceColor','r','MarkerEdgeColor','r' );
 end
 
-for ii= 2: max(size(current_x))
+
+
+for ii= 1: max(size(current_x))
     
 
     observer_x = current_x(ii);
@@ -208,27 +210,33 @@ for ii= 2: max(size(current_x))
     else
         sensor_detect_indicator(ii)= 0;
     end
+    if ii >= 2
+        
+        txt1 = ['T = ',num2str(ii)];
+        text(X_MAX/2-1,Y_MAX+5,txt1,'FontSize',20)
+        
+        txt2 = ['Region Exploration:  Total Reward=',num2str(reward_step(ii)), ', Current Reward =',num2str(reward_step(ii) - reward_step(ii-1))];
+        text(X_MIN+4,Y_MAX+4,txt2,'FontSize',20)
+        
+        txt3 = ['Agent Observation: Total Penalty = ',num2str(sum(sensor_detect_indicator(1:ii))),', Current Penalty =', num2str(sensor_detect_indicator(ii))];
+        text(X_MIN+4,Y_MAX+3,txt3,'FontSize',20)
+        
+        txt4 = ['Assets Captured: Total Penalty = ',num2str(TeammatePenalty*sum(Teammate_detected(1:5))),', Current Penalty =', num2str(TeammatePenalty*CurrentPenalty)];
+        text(X_MIN+4,Y_MAX+2,txt4,'FontSize',20)
+        
+        txt5 = ['Combined: Total Reward = ',num2str(reward_step(ii)- sum(sensor_detect_indicator(1:ii))...
+            -(TeammatePenalty*sum(Teammate_detected(1:5)))),', Current Reward =', num2str(reward_step(ii) - reward_step(ii-1)- ...
+            (sensor_detect_indicator(ii)) - (TeammatePenalty*CurrentPenalty))];
+        text(X_MIN+4,Y_MAX+1,txt5,'FontSize',20)
+        
+        CurrentPenalty = 0;
+    end
     
-    txt1 = ['T = ',num2str(ii)];
-    text(X_MAX/2-1,Y_MAX+5,txt1,'FontSize',20)
-    
-    txt2 = ['Region Exploration:  Total Reward=',num2str(reward_step(ii)), ', Current Reward =',num2str(reward_step(ii) - reward_step(ii-1))];
-    text(X_MIN+4,Y_MAX+4,txt2,'FontSize',20)  
-
-    txt3 = ['Agent Observation: Total Penalty = ',num2str(sum(sensor_detect_indicator(1:ii))),', Current Penalty =', num2str(sensor_detect_indicator(ii))];
-    text(X_MIN+4,Y_MAX+3,txt3,'FontSize',20)
-    
-    txt4 = ['Assets Captured: Total Penalty = ',num2str(TeammatePenalty*sum(Teammate_detected(1:5))),', Current Penalty =', num2str(TeammatePenalty*CurrentPenalty)];
-    text(X_MIN+4,Y_MAX+2,txt4,'FontSize',20)
-    
-    txt5 = ['Combined: Total Reward = ',num2str(reward_step(ii)- sum(sensor_detect_indicator(1:ii))...
-        -(TeammatePenalty*sum(Teammate_detected(1:5)))),', Current Reward =', num2str(reward_step(ii) - reward_step(ii-1)- ...
-        (sensor_detect_indicator(ii)) - (TeammatePenalty*CurrentPenalty))];
-    text(X_MIN+4,Y_MAX+1,txt5,'FontSize',20)
-    
-    CurrentPenalty = 0;
-    
-
+    plot3(sensor_x(1:ii-1),sensor_y(1:ii-1),0.1*ones( max(size(sensor_x(1:ii-1))) , 1 ),'b','LineWidth',5)
+    plot3(sensor_x(ii-1:ii),sensor_y(ii-1:ii),0.1*ones( max(size(sensor_x(ii-1:ii))) , 1 ),':b','LineWidth',5)
+    plot3(current_x(1:ii-1),current_y(1:ii-1),0.1*ones( max(size(current_x(1:ii-1))) , 1 ),'r','LineWidth',5)
+    plot3(current_x(ii-1:ii),current_y(ii-1:ii),0.1*ones( max(size(current_x(ii-1:ii))) , 1 ),':r','LineWidth',5)
+    pause(0.1)
     hold off
     %
          mov(ii) = getframe(gca);
