@@ -19,10 +19,11 @@ for i = 2*T+1 :-1:1
             One_Pass.Nodes.E_them{list(j)} = E_them;
             E_them_temp = E_them;
             
+            Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)};
             for M = 0:Number_of_Function-1
                 E_them = E_them_temp;
                 Function_M = dec2bin(M,Function_index_size);
-                Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)};
+%                 Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)};
                 for N = Function_index_size:-1:1
                     if Function_M(N) == '1' 
                         E_them = E_them - str2double(Detection_Asset_Collect(N)) * Negtive_Asset;
@@ -146,12 +147,23 @@ for i = 2*T+1 :-1:1
            One_Pass.Nodes.Decision_Value(list(j)) = One_Pass.Nodes.E_them{Best_node}(Decision_Index_E_them);
            
            %Update E_them
+%            E_them = One_Pass.Nodes.E_them{Children_node(1)};
+%            for M = 1:Number_of_Function
+%                 for k = 1:nnz(Children_node) 
+%                     One_Pass_Nodes_E_them_temp = One_Pass.Nodes.E_them{Children_node(k)};
+%                     E_them(M) = max(E_them(M),One_Pass_Nodes_E_them_temp(M));
+%                 end
+%            end
+           
            E_them = One_Pass.Nodes.E_them{Children_node(1)};
-           for M = 1:Number_of_Function
-                for k = 1:nnz(Children_node) 
-                    E_them(M) = max(E_them(M),One_Pass.Nodes.E_them{Children_node(1)}(M));
-                end
+
+           for k = 1:nnz(Children_node)
+               One_Pass_Nodes_E_them_temp = One_Pass.Nodes.E_them{Children_node(k)};
+               for M = 1:Number_of_Function
+                   E_them(M) = max(E_them(M),One_Pass_Nodes_E_them_temp(M));
+               end
            end
+           
            One_Pass.Nodes.E_them{list(j)} = E_them;
             
         end
