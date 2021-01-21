@@ -22,14 +22,17 @@ for i = 2*T+1 :-1:1
             for M = 0:Number_of_Function-1
                 E_them = E_them_temp;
                 Function_M = dec2bin(M,Function_index_size);
+                Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)};
                 for N = Function_index_size:-1:1
                     if Function_M(N) == '1' 
-                        E_them = E_them - str2num(One_Pass.Nodes.Detection_Asset_Collect{list(j)}(N)) * Negtive_Asset;
+                        E_them = E_them - str2double(Detection_Asset_Collect(N)) * Negtive_Asset;
                     end      
                 end
-                One_Pass.Nodes.E_them{list(j)}(1,M+1) = E_them;
+                One_Pass_Nodes_E_them(1,M+1) = E_them;
             end
             
+            
+            One_Pass.Nodes.E_them{list(j)} = One_Pass_Nodes_E_them;
             One_Pass.Nodes.E_us(list(j)) = E_them; 
             One_Pass.Nodes.Decision_Node(list(j)) = list(j);
             

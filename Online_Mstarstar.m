@@ -52,7 +52,7 @@ Negtive_Asset = 30;
 Lookahead = 2;
 T = Lookahead;
 
-T_execution = 5;       % how many time steps to execute the online planner
+T_execution = 10;       % how many time steps to execute the online planner
 
 V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);
 Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),ENV_SIZE, ENV_SIZE);
@@ -60,9 +60,11 @@ for step = 1:T_execution
     
     %% Build the tree
     Tree = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,Detection_Asset_Collect,environment,Lookahead,Negtive_Reward,Negtive_Asset);
-    %% One Pass
+    %% Run the DM1 One Pass to back propagate the reward values
+    %Change RunDM1 to RunLeafLookAhed or RunMinimax_multi_assets to run
+    %other algorithms
     [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset,Negtive_Reward,Negtive_Asset);
-    
+    %% Record the action for next step, also record the assets collected realdy
     Record_path_Agent(:,step + 1) = Initial_Agent;
     Record_path_Opponent(:,step + 1) = Initial_Opponent;
     Detection_Asset_Collect = Assets_Collected;
