@@ -1,47 +1,5 @@
-clear all; close all; clc;
-%Robustness constant
-epsilon = 0.000000001;
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region] = RunDM1(Tree,T,Negtive_Reward,Negtive_Asset)
 
-
-%Snap distance (distance within which an observer location will be snapped to the
-%boundary before the visibility polygon is computed)
-clear
-snap_distance = 0.05;
-
-
-%Read environment geometry from file
-environment = read_vertices_from_file('./Environments/M_starstar6.environment');
-
-Initial_Agent = [2;7];
-Initial_Opponent = [1;6];
-
-Asset_Position = [7 7; 12 5;6 11;3 11; 11 4];
-% Asset_Position = [5 11];
-%The frequency that the Asset appear
-Asset_appear_mod = 1;
-
-Negtive_Reward = 1;
-Negtive_Asset = 10;
-
-Lookahead = 3;  
-T = Lookahead;
-
-
-%The frquence
-Pr = 0.5;
-%E_them = bwarea(FirstPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* FirstPass.Nodes.Agent_Detection_time(list(j));
-%E_smart with pr
-%E_smart = bwarea(SecondPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* SecondPass.Nodes.Agent_Detection_time(list(j)) -Pr* Negtive_Asset*(SecondPass.Nodes.Asset_Detection_time_E_smart(list(j)) >= 1);
-%E_smaet with mod
-%E_smaet = bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Asset*(ThirdPass.Nodes.Detection_time_E_smart(list(j)) >= 1);
-%E_us = bwarea(ThirdPass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* ThirdPass.Nodes.Agent_Detection_time(list(j)) - Negtive_Asset*(ThirdPass.Nodes.Asset_Detection_time(list(j)) >= 1);
-
-
-%% Build the tree
-Tree = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Asset_Position,environment,Lookahead);
-
-
-%% One Pass
 One_Pass = Tree;
 Number_of_Asset = size(Asset_Position,1);
 Number_of_Function = 0;
@@ -192,6 +150,8 @@ for k =1:2:nnz(One_Pass_Node_path)
 end
 
 
+Initial_Agent = [Agent_path_x(2);Agent_path_y(2)];
+Initial_Opponent = [Opponent_path_x(2);Opponent_path_y(2)];
+Initial_Agent_Region = ThirdPass.Nodes.Agent_Region{ThirdPass_Node_path(3)};
 
-% Agent_next = [Vis.Nodes.Agent_x(Node_path(2)); Vis.Nodes.Agent_y(Node_path(2))];
-% Opponent_next = [Vis.Nodes.Opponent_x(Node_path(3)); Vis.Nodes.Opponent_y(Node_path(3))];
+end

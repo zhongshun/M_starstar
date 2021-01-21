@@ -1,4 +1,4 @@
-clear all; close all; clc;
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region, WiseUp] = One_Pass_Version_with_mulit_assets_F(Tree,T,Negtive_Reward,Negtive_Teammate)
 %Robustness constant
 epsilon = 0.000000001;
 
@@ -10,12 +10,12 @@ snap_distance = 0.05;
 
 
 %Read environment geometry from file
-environment = read_vertices_from_file('./Environments/M_starstar6.environment');
+environment = read_vertices_from_file('./Environments/M_starstar12.environment');
 
-Initial_Agent = [2;7];
-Initial_Opponent = [1;6];
-
-Asset_Position = [7 7; 12 5;6 11;3 11; 11 4];
+% Initial_Agent = [2;7];
+% Initial_Opponent = [1;6];
+% 
+% Asset_Position = [7 7; 12 5;6 11;3 11; 11 4];
 % Asset_Position = [5 11];
 %The frequency that the Asset appear
 Asset_appear_mod = 1;
@@ -23,7 +23,7 @@ Asset_appear_mod = 1;
 Negtive_Reward = 1;
 Negtive_Asset = 10;
 
-Lookahead = 3;  
+Lookahead = 3;
 T = Lookahead;
 
 
@@ -64,14 +64,14 @@ for i = 2*T+1 :-1:1
                 E_them = [bwarea(One_Pass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* One_Pass.Nodes.Agent_Detection_time(list(j))];
                 Function_M = dec2bin(M,Function_index_size);
                 for N = Function_index_size:-1:1
-                    if Function_M(N) == '1' 
+                    if Function_M(N) == '1'
                         E_them = E_them - str2num(One_Pass.Nodes.Detection_Asset_Collect{list(j)}(N)) * Negtive_Asset;
-                    end      
+                    end
                 end
                 One_Pass.Nodes.E_them{list(j)}(1,M+1) = E_them;
             end
             
-            One_Pass.Nodes.E_us(list(j)) = E_them; 
+            One_Pass.Nodes.E_us(list(j)) = E_them;
             One_Pass.Nodes.Decision_Node(list(j)) = list(j);
             
         end
@@ -80,8 +80,8 @@ for i = 2*T+1 :-1:1
             Children_node = successors(One_Pass,list(j));
             %Find which function we need to use based on the wise up state
             %of the opponent
-
-            Decision_Index_E_them = bin2dec(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}')+1;     
+            
+            Decision_Index_E_them = bin2dec(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}')+1;
             Best_value = One_Pass.Nodes.E_them{Children_node(1)}(Decision_Index_E_them);
             
             for k = 1:nnz(Children_node)
@@ -89,38 +89,38 @@ for i = 2*T+1 :-1:1
                     Best_value = One_Pass.Nodes.E_them{Children_node(k)}(Decision_Index_E_them);
                 end
             end
-
-           %Find the minimal value based on the wise up state of the
-           %opponent 
-           Best_nodes = [];
-           for k = 1:nnz(Children_node)           
+            
+            %Find the minimal value based on the wise up state of the
+            %opponent
+            Best_nodes = [];
+            for k = 1:nnz(Children_node)
                 if One_Pass.Nodes.E_them{Children_node(k)}(Decision_Index_E_them) == Best_value
                     Best_nodes(nnz(Best_nodes) + 1) = Children_node(k);
-                end             
-           end
-           Best_node = Best_nodes(1);
-           if nnz(Best_nodes) > 1
-               Best_one = 1;
-               for B = 1:nnz(Best_nodes)
-                   if distance([One_Pass.Nodes.Agent_x(Best_nodes(B)),One_Pass.Nodes.Agent_y(Best_nodes(B))],[One_Pass.Nodes.Opponent_x(Best_nodes(B)),One_Pass.Nodes.Opponent_y(Best_nodes(B))])...
-                           < distance([One_Pass.Nodes.Agent_x(Best_nodes(Best_one)),One_Pass.Nodes.Agent_y(Best_nodes(Best_one))],[One_Pass.Nodes.Opponent_x(Best_nodes(Best_one)),One_Pass.Nodes.Opponent_y(Best_nodes(Best_one))])
-                       Best_one = B;
-                   end
-                   Best_node = Best_nodes(Best_one);
-               end
-           else
-               Best_node = Best_nodes;
-           end
-
-           One_Pass.Nodes.Decision_Value(list(j)) = One_Pass.Nodes.E_them{Best_node}(Decision_Index_E_them);
-           One_Pass.Nodes.Decision_Node(list(j)) = Best_node;
-           One_Pass.Nodes.E_us(list(j)) = One_Pass.Nodes.E_us(Best_node);
-           One_Pass.Nodes.E_them(list(j)) = One_Pass.Nodes.E_them(Best_node);
+                end
+            end
+            Best_node = Best_nodes(1);
+            if nnz(Best_nodes) > 1
+                Best_one = 1;
+                for B = 1:nnz(Best_nodes)
+                    if distance([One_Pass.Nodes.Agent_x(Best_nodes(B)),One_Pass.Nodes.Agent_y(Best_nodes(B))],[One_Pass.Nodes.Opponent_x(Best_nodes(B)),One_Pass.Nodes.Opponent_y(Best_nodes(B))])...
+                            < distance([One_Pass.Nodes.Agent_x(Best_nodes(Best_one)),One_Pass.Nodes.Agent_y(Best_nodes(Best_one))],[One_Pass.Nodes.Opponent_x(Best_nodes(Best_one)),One_Pass.Nodes.Opponent_y(Best_nodes(Best_one))])
+                        Best_one = B;
+                    end
+                    Best_node = Best_nodes(Best_one);
+                end
+            else
+                Best_node = Best_nodes;
+            end
+            
+            One_Pass.Nodes.Decision_Value(list(j)) = One_Pass.Nodes.E_them{Best_node}(Decision_Index_E_them);
+            One_Pass.Nodes.Decision_Node(list(j)) = Best_node;
+            One_Pass.Nodes.E_us(list(j)) = One_Pass.Nodes.E_us(Best_node);
+            One_Pass.Nodes.E_them(list(j)) = One_Pass.Nodes.E_them(Best_node);
         end
     else %MAX Level
         for j = 1:nnz(list)
             Children_node = successors(One_Pass,list(j));
-
+            
             Best_value = One_Pass.Nodes.E_us(Children_node(1));
             
             for k = 1:nnz(Children_node)
@@ -128,43 +128,43 @@ for i = 2*T+1 :-1:1
                     Best_value = One_Pass.Nodes.E_us(Children_node(k));
                 end
             end
-
-           %Find the maximal value based on the wise up state of the
-           %opponent 
-           Best_nodes = [];
-           for k = 1:nnz(Children_node)           
+            
+            %Find the maximal value based on the wise up state of the
+            %opponent
+            Best_nodes = [];
+            for k = 1:nnz(Children_node)
                 if One_Pass.Nodes.E_us(Children_node(k)) == Best_value
                     Best_nodes(nnz(Best_nodes) + 1) = Children_node(k);
-                end             
-           end
-           Best_node = Best_nodes(1);
-
-           if nnz(Best_nodes) > 1 
-               for k = 1:nnz(Best_nodes)
-                   if One_Pass.Nodes.Agent_x(i) == One_Pass.Nodes.Agent_x(Children_node(k)) &&...
-                           One_Pass.Nodes.Agent_y(i) == One_Pass.Nodes.Agent_y(Children_node(k))
-                       Best_node = Best_nodes(k);
-                       break
-                   else
-                       Best_node = Best_nodes(randi([1,nnz(Best_nodes)]));
-                   end
-               end
-           else
-               Best_node = Best_nodes;
-           end
-                 
-           One_Pass.Nodes.Decision_Node(list(j)) = Best_node;
-           One_Pass.Nodes.E_us(list(j)) = One_Pass.Nodes.E_us(Best_node);
-           One_Pass.Nodes.Decision_Value(list(j)) = One_Pass.Nodes.E_them{Best_node}(Decision_Index_E_them);
-           
-           %Update E_them
-           E_them = One_Pass.Nodes.E_them{Children_node(1)};
-           for M = 1:Number_of_Function
-                for k = 1:nnz(Children_node) 
+                end
+            end
+            Best_node = Best_nodes(1);
+            
+            if nnz(Best_nodes) > 1
+                for k = 1:nnz(Best_nodes)
+                    if One_Pass.Nodes.Agent_x(i) == One_Pass.Nodes.Agent_x(Children_node(k)) &&...
+                            One_Pass.Nodes.Agent_y(i) == One_Pass.Nodes.Agent_y(Children_node(k))
+                        Best_node = Best_nodes(k);
+                        break
+                    else
+                        Best_node = Best_nodes(randi([1,nnz(Best_nodes)]));
+                    end
+                end
+            else
+                Best_node = Best_nodes;
+            end
+            
+            One_Pass.Nodes.Decision_Node(list(j)) = Best_node;
+            One_Pass.Nodes.E_us(list(j)) = One_Pass.Nodes.E_us(Best_node);
+            One_Pass.Nodes.Decision_Value(list(j)) = One_Pass.Nodes.E_them{Best_node}(Decision_Index_E_them);
+            
+            %Update E_them
+            E_them = One_Pass.Nodes.E_them{Children_node(1)};
+            for M = 1:Number_of_Function
+                for k = 1:nnz(Children_node)
                     E_them(M) = max(E_them(M),One_Pass.Nodes.E_them{Children_node(1)}(M));
                 end
-           end
-           One_Pass.Nodes.E_them{list(j)} = E_them;
+            end
+            One_Pass.Nodes.E_them{list(j)} = E_them;
             
         end
     end
@@ -191,6 +191,7 @@ for k =1:2:nnz(One_Pass_Node_path)
     Opponent_path_y((k+1)/2) = One_Pass.Nodes.Opponent_y(One_Pass_Node_path(k));
 end
 
+end
 
 
 % Agent_next = [Vis.Nodes.Agent_x(Node_path(2)); Vis.Nodes.Agent_y(Node_path(2))];
