@@ -33,7 +33,10 @@ for i = 2*T+1 :-1:1
         end
     elseif ~mod(i,2) %MIN Level
         for j = 1:nnz(list)
-            Children_node = successors(One_Pass,list(j));
+%             Children_node = successors(One_Pass,list(j));
+
+            Children_node = One_Pass.Nodes.Successors{list(j)};
+            
             %Find which function we need to use based on the wise up state
             %of the opponent
 
@@ -95,7 +98,9 @@ for i = 2*T+1 :-1:1
         end
     else %MAX Level
         for j = 1:nnz(list)
-            Children_node = successors(One_Pass,list(j));
+%             Children_node = successors(One_Pass,list(j));
+            Children_node = One_Pass.Nodes.Successors{list(j)};
+
 
             Best_value = One_Pass.Nodes.E_us(Children_node(1));
             

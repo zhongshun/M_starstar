@@ -49,10 +49,10 @@ Negtive_Reward = 1;
 Negtive_Asset = 30;
 % WiseUp = 0;
 
-Lookahead = 2;
+Lookahead = 3;
 T = Lookahead;
 
-T_execution = 5;       % how many time steps to execute the online planner
+T_execution = 10;       % how many time steps to execute the online planner
 
 V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);
 Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),ENV_SIZE, ENV_SIZE);

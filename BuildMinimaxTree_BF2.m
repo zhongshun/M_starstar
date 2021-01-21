@@ -21,12 +21,15 @@ Number_of_Asset = size(Asset,1);
 epsilon = 0.01;
 snap_distance = 0.05;
 
-Vis = digraph([1],[]);
+% Vis = digraph([1],[]);
+
 Vis.Nodes.Agent_x= Initial_Agent(1);
 Vis.Nodes.Agent_y= Initial_Agent(2);
 Vis.Nodes.Opponent_x=Initial_Opponent(1);
 Vis.Nodes.Opponent_y=Initial_Opponent(2);
 Vis.Nodes.Generation = 1;
+
+Vis.Nodes.Successors{1} = [];
 
 % Vis.Nodes.Visited_Time = 1;
 % Vis.Nodes.Detection_Asset_WiseUp_Index{1} = num2str(zeros(Number_of_Asset,1));
@@ -88,7 +91,10 @@ for i = 2:2*T+1
                 if in_environment( [Vis.Nodes.Agent_x(j)+Action_Space(actions,1), Vis.Nodes.Agent_y(j)+Action_Space(actions,2)] , environment , 0.01 ) &&...
                         in_environment( [Vis.Nodes.Agent_x(j)+Action_Space(actions,1)*1/2, Vis.Nodes.Agent_y(j)+Action_Space(actions,2)*1/2] , environment , 0.01 )
                     % Add new edge to the tree
-                    Vis=addedge(Vis,j,Count+1);
+%                     Vis=addedge(Vis,j,Count+1); ************
+                    Vis.Nodes.Successors{j} = [ Vis.Nodes.Successors{j}, Count+1];
+                    Vis.Nodes.Successors{Count+1} = [];
+                    
                     % update the agent's position
                     Vis.Nodes.Agent_x(Count+1) = Vis.Nodes.Agent_x(j)+Action_Space(actions,1);
                     Vis.Nodes.Agent_y(Count+1) = Vis.Nodes.Agent_y(j)+Action_Space(actions,2);
@@ -136,13 +142,20 @@ for i = 2:2*T+1
                 if in_environment( [Vis.Nodes.Opponent_x(j)+Action_Space(actions,1), Vis.Nodes.Opponent_y(j)+Action_Space(actions,2)] , environment , 0.01 ) &&...
                         in_environment( [Vis.Nodes.Opponent_x(j)+0.5*Action_Space(actions,1), Vis.Nodes.Opponent_y(j)+0.5*Action_Space(actions,2)] , environment , 0.01 )
                     % Add new edge to the tree
-                    Vis=addedge(Vis,j,Count+1);
+%                     Vis=addedge(Vis,j,Count+1); **********
+
+                    Vis.Nodes.Successors{j} = [Vis.Nodes.Successors{j}, Count+1];
+                    Vis.Nodes.Successors{Count+1} = [];
+                    
+                    
                     % Agent's position is the same as its parent node
                     Vis.Nodes.Agent_x(Count+1) = Vis.Nodes.Agent_x(j);
                     Vis.Nodes.Agent_y(Count+1) = Vis.Nodes.Agent_y(j);
                     Vis.Nodes.Opponent_x(Count+1) = Vis.Nodes.Opponent_x(j)+Action_Space(actions,1);
                     Vis.Nodes.Opponent_y(Count+1) = Vis.Nodes.Opponent_y(j)+Action_Space(actions,2);
                     Vis.Nodes.Agent_Region{Count+1} = Vis.Nodes.Agent_Region{j};
+                    Vis.Nodes.Asset_Collect_times(Count+1) = Vis.Nodes.Asset_Collect_times(j);
+                    
 %                     Vis.Nodes.Parent(Count+1) = j;
                     
                     % Min level will update detection times, both for the agent and the assets                  
