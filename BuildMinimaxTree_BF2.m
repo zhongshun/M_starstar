@@ -67,12 +67,13 @@ environment_max_y = max(environment{1}(:,2));
 
 Action_Space = [1 0;0 1;-1 0; 0 -1;0 0];
 
+%% Start to build the search tree using breadth first expand
 for i = 2:2*T+1
     Current_step = ceil(i/2);
     Initial_node = New_Initial;
     End_node = New_End;
 
-        
+    % Expand the MAX level, the agent's turn  
     if mod(i,2) == 0
         for j = Initial_node:End_node
             if j == Initial_node
@@ -80,14 +81,19 @@ for i = 2:2*T+1
             end
             
             for actions = 1:size(Action_Space,1)
-                
+                % Check the new point is in environment or not 
                 if in_environment( [Vis.Nodes.Agent_x(j)+Action_Space(actions,1), Vis.Nodes.Agent_y(j)+Action_Space(actions,2)] , environment , 0.01 ) &&...
                         in_environment( [Vis.Nodes.Agent_x(j)+Action_Space(actions,1)*1/2, Vis.Nodes.Agent_y(j)+Action_Space(actions,2)*1/2] , environment , 0.01 )
+                    % Add new edge to the tree
                     Vis=addedge(Vis,j,Count+1);
+                    % update the agent's position
                     Vis.Nodes.Agent_x(Count+1) = Vis.Nodes.Agent_x(j)+Action_Space(actions,1);
                     Vis.Nodes.Agent_y(Count+1) = Vis.Nodes.Agent_y(j)+Action_Space(actions,2);
+                    % Opponent's position is the same as its parent node
                     Vis.Nodes.Opponent_x(Count+1) = Vis.Nodes.Opponent_x(j);
                     Vis.Nodes.Opponent_y(Count+1) = Vis.Nodes.Opponent_y(j);
+                    
+                    % MAX level will not update detection times
                     Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j);
                     Vis.Nodes.Asset_Collect_times(Count+1) =  Vis.Nodes.Asset_Collect_times(j);
                     Vis.Nodes.WiseUp(Count+1) = Vis.Nodes.WiseUp(j);
@@ -96,6 +102,8 @@ for i = 2:2*T+1
                     Vis.Nodes.Detection_Asset_Collect{Count+1} = Vis.Nodes.Detection_Asset_Collect{j};
                     Vis.Nodes.Parent(Count+1) = j;
                     
+                    % MAX level will  update the positive reward it
+                    % collected
                     V{1} = visibility_polygon( [Vis.Nodes.Agent_x(Count+1) Vis.Nodes.Agent_y(Count+1)] , environment , epsilon , snap_distance );
                     Vis.Nodes.Agent_Region{Count+1} = poly2mask(V{1}(:,1),V{1}(:,2),50, 50) | Vis.Nodes.Agent_Region{j};
                     
@@ -113,6 +121,7 @@ for i = 2:2*T+1
             end
             
         end
+    % Expand the MIN level, the opponent's turn  
     else
         for j = Initial_node:End_node
             if j == Initial_node
@@ -120,9 +129,12 @@ for i = 2:2*T+1
             end
             
             for actions = 1:size(Action_Space,1)
+                % Check the new point is in environment or not 
                 if in_environment( [Vis.Nodes.Opponent_x(j)+Action_Space(actions,1), Vis.Nodes.Opponent_y(j)+Action_Space(actions,2)] , environment , 0.01 ) &&...
                         in_environment( [Vis.Nodes.Opponent_x(j)+0.5*Action_Space(actions,1), Vis.Nodes.Opponent_y(j)+0.5*Action_Space(actions,2)] , environment , 0.01 )
+                    % Add new edge to the tree
                     Vis=addedge(Vis,j,Count+1);
+                    % Agent's position is the same as its parent node
                     Vis.Nodes.Agent_x(Count+1) = Vis.Nodes.Agent_x(j);
                     Vis.Nodes.Agent_y(Count+1) = Vis.Nodes.Agent_y(j);
                     Vis.Nodes.Opponent_x(Count+1) = Vis.Nodes.Opponent_x(j)+Action_Space(actions,1);
@@ -130,6 +142,7 @@ for i = 2:2*T+1
                     Vis.Nodes.Agent_Region{Count+1} = Vis.Nodes.Agent_Region{j};
                     Vis.Nodes.Parent(Count+1) = j;
                     
+                    % Min level will update detection times, both for the agent and the assets                  
                     W{1} = visibility_polygon( [Vis.Nodes.Opponent_x(Count+1) Vis.Nodes.Opponent_y(Count+1)] , environment , epsilon , snap_distance );
                     if in_environment( [Vis.Nodes.Agent_x(Count+1) Vis.Nodes.Agent_y(Count+1)] , W , epsilon )
                         Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j) + 1;
