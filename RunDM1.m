@@ -1,13 +1,6 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset)
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size)
 
 One_Pass = Tree;
-Number_of_Asset = size(Asset_Position,1);
-Number_of_Function = 0;
-for i = 0:Number_of_Asset
-    Number_of_Function = Number_of_Function + nchoosek(Number_of_Asset,i);
-end
-Function_index = dec2bin(Number_of_Function-1);
-Function_index_size = size(Function_index,2);
 
 for i = 2*T+1 :-1:1
     list =  find(One_Pass.Nodes.Generation == i);
@@ -16,10 +9,10 @@ for i = 2*T+1 :-1:1
             %   List all the reward value based on the detection of one
             %   of the assests or not
             E_them = [bwarea(One_Pass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* One_Pass.Nodes.Agent_Detection_time(list(j))];
-            One_Pass.Nodes.E_them{list(j)} = E_them;
+%             One_Pass.Nodes.E_them{list(j)} = E_them;
             E_them_temp = E_them;
             
-            Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)};
+            Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)}; %indicator to label which asset is collected along the path to this node
             for M = 0:Number_of_Function-1
                 E_them = E_them_temp;
                 Function_M = dec2bin(M,Function_index_size);
@@ -44,7 +37,7 @@ for i = 2*T+1 :-1:1
             %Find which function we need to use based on the wise up state
             %of the opponent
 
-            Decision_Index_E_them = bin2dec(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}')+1;     
+            Decision_Index_E_them = bin2dec(num2str(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}'))+1;     
             Best_value = One_Pass.Nodes.E_them{Children_node(1)}(Decision_Index_E_them);
             
             for k = 1:nnz(Children_node)

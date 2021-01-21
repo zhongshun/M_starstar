@@ -49,13 +49,22 @@ Negtive_Reward = 1;
 Negtive_Asset = 30;
 % WiseUp = 0;
 
-Lookahead = 3;
+Lookahead = 2;
 T = Lookahead;
 
 T_execution = 5;       % how many time steps to execute the online planner
 
 V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);
 Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),ENV_SIZE, ENV_SIZE);
+
+Number_of_Asset = size(Asset,1);
+Number_of_Function = 0;
+for i = 0:Number_of_Asset
+    Number_of_Function = Number_of_Function + nchoosek(Number_of_Asset,i);
+end
+Function_index = dec2bin(Number_of_Function-1);
+Function_index_size = size(Function_index,2);
+
 for step = 1:T_execution
     
     %% Build the tree
@@ -63,7 +72,7 @@ for step = 1:T_execution
     %% Run the DM1 One Pass to back propagate the reward values
     %Change RunDM1 to RunLeafLookAhed or RunMinimax_multi_assets to run
     %other algorithms
-    [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset,Negtive_Reward,Negtive_Asset);
+    [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size);
     %% Record the action for next step, also record the assets collected realdy
     Record_path_Agent(:,step + 1) = Initial_Agent;
     Record_path_Opponent(:,step + 1) = Initial_Opponent;
