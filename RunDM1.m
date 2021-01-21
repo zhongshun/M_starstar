@@ -1,4 +1,4 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region] = RunDM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset)
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset)
 
 One_Pass = Tree;
 Number_of_Asset = size(Asset_Position,1);
@@ -153,5 +153,6 @@ end
 Initial_Agent = [Agent_path_x(2);Agent_path_y(2)];
 Initial_Opponent = [Opponent_path_x(2);Opponent_path_y(2)];
 Initial_Agent_Region = One_Pass.Nodes.Agent_Region{One_Pass_Node_path(3)};
+Assets_Collected = One_Pass.Nodes.Detection_Asset_Collect{One_Pass_Node_path(3)};
 
 end

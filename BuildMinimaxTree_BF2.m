@@ -6,14 +6,16 @@
 % Initial_Opponent = [0;0];
 % Obstacle_Set = [2 2 2 2 2;1 2 3 4 5];
 
-function Vis = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Asset,environment,Lookahead)
+function Vis = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Asset,Detection_Asset_Collect,environment,Lookahead)
 
 Number_of_Asset = size(Asset,1);
 Number_of_Function = 0;
+% Compute the number of the candidate function based on the number of
+% assets
 for i = 0:Number_of_Asset
     Number_of_Function = Number_of_Function + nchoosek(Number_of_Asset,i);
 end
-
+%Use "1" or "0" to indicate which asset is detected
 Function_index = dec2bin(Number_of_Function-1);
 
 epsilon = 0.01;
@@ -28,7 +30,7 @@ Vis.Nodes.Generation = 1;
 
 Vis.Nodes.Visited_Time = 1;
 Vis.Nodes.Detection_Asset_WiseUp_Index{1} = num2str(zeros(Number_of_Asset,1));
-Vis.Nodes.Detection_Asset_Collect{1} = num2str(zeros(Number_of_Asset,1));
+Vis.Nodes.Detection_Asset_Collect{1} = Detection_Asset_Collect;
 
 Vis.Nodes.WiseUp = 0;
 
