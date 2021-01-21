@@ -61,7 +61,7 @@ for i = 2*T+1 :-1:1
            if nnz(Best_nodes) > 1 
                Best_one = 1;
                for B = 1:nnz(Best_nodes)
-                   if One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) < One_Pass.Nodes.Current_Step_reward(Best_nodes(Best_one)) 
+                   if One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) < One_Pass.Nodes.Current_Step_reward(Best_one) 
                        Best_one = B;
                    end
                end
@@ -120,7 +120,7 @@ for i = 2*T+1 :-1:1
                    else                      
                        Best_one = 1;
                        for B = 1:nnz(Best_nodes)
-                           if One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) > One_Pass.Nodes.Current_Step_reward(Best_nodes(Best_one))
+                           if One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) > One_Pass.Nodes.Current_Step_reward(Best_one)
                                Best_one = B;
                            end
                            Best_node = Best_nodes(Best_one);
