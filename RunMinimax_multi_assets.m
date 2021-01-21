@@ -1,11 +1,15 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset)
-
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunMinimax_multi_assets(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset)
+%Minimax with overestimate
 One_Pass = Tree;
 Number_of_Asset = size(Asset_Position,1);
-Number_of_Function = 0;
-for i = 0:Number_of_Asset
-    Number_of_Function = Number_of_Function + nchoosek(Number_of_Asset,i);
-end
+%For minimax Number_of_Function is 1
+Number_of_Function = 1;
+
+%For DM1
+% for i = 0:Number_of_Asset
+%     Number_of_Function = Number_of_Function + nchoosek(Number_of_Asset,i);
+% end
+
 Function_index = dec2bin(Number_of_Function-1);
 Function_index_size = size(Function_index,2);
 
@@ -17,18 +21,41 @@ for i = 2*T+1 :-1:1
             %   of the assests or not
             E_them = [bwarea(One_Pass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* One_Pass.Nodes.Agent_Detection_time(list(j))];
             One_Pass.Nodes.E_them{list(j)} = E_them;
-            E_them_temp = E_them;
             
-            for M = 0:Number_of_Function-1
-                E_them = E_them_temp;
-                Function_M = dec2bin(M,Function_index_size);
-                for N = Function_index_size:-1:1
-                    if Function_M(N) == '1' 
-                        E_them = E_them - str2num(One_Pass.Nodes.Detection_Asset_Collect{list(j)}(N)) * Negtive_Asset;
-                    end      
+            %only consier the last (overestimate) or the first equation (underestimate)
+            %overestimate case
+            M = Number_of_Function-1;
+            E_them = [bwarea(One_Pass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* One_Pass.Nodes.Agent_Detection_time(list(j))];
+            Function_M = dec2bin(M,Function_index_size);
+            for N = Function_index_size:-1:1
+                if Function_M(N) == '1'
+                    E_them = E_them - str2num(One_Pass.Nodes.Detection_Asset_Collect{list(j)}(N)) * Negtive_Asset;
                 end
-                One_Pass.Nodes.E_them{list(j)}(1,M+1) = E_them;
             end
+            One_Pass.Nodes.E_them{list(j)}(1,1) = E_them;
+            
+%             %underestimated case
+%             M = Number_of_Function-1;
+%             E_them = [bwarea(One_Pass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* One_Pass.Nodes.Agent_Detection_time(list(j))];
+%             Function_M = dec2bin(M,Function_index_size);
+%             for N = Function_index_size:-1:1
+%                 if Function_M(N) == '1'
+%                     E_them = E_them - str2num(One_Pass.Nodes.Detection_Asset_Collect{list(j)}(N)) * Negtive_Asset;
+%                 end
+%             end
+%             One_Pass.Nodes.E_them{list(j)}(1,1) = E_them;
+            
+            
+%             for M = 0:Number_of_Function-1
+%                 E_them = [bwarea(One_Pass.Nodes.Agent_Region{list(j)}) - Negtive_Reward* One_Pass.Nodes.Agent_Detection_time(list(j))];
+%                 Function_M = dec2bin(M,Function_index_size);
+%                 for N = Function_index_size:-1:1
+%                     if Function_M(N) == '1'
+%                         E_them = E_them - str2num(One_Pass.Nodes.Detection_Asset_Collect{list(j)}(N)) * Negtive_Asset;
+%                     end
+%                 end
+%                 One_Pass.Nodes.E_them{list(j)}(1,M+1) = E_them;
+%             end
             
             One_Pass.Nodes.E_us(list(j)) = E_them; 
             One_Pass.Nodes.Decision_Node(list(j)) = list(j);
@@ -39,8 +66,10 @@ for i = 2*T+1 :-1:1
             Children_node = successors(One_Pass,list(j));
             %Find which function we need to use based on the wise up state
             %of the opponent
-
-            Decision_Index_E_them = bin2dec(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}')+1;     
+%             %DM1 use 
+%             Decision_Index_E_them = bin2dec(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}')+1;     
+      %Minimax uses
+            Decision_Index_E_them = 1;   
             Best_value = One_Pass.Nodes.E_them{Children_node(1)}(Decision_Index_E_them);
             
             for k = 1:nnz(Children_node)
@@ -144,11 +173,19 @@ for i = 2*T+1 :-1:1
            
            %Update E_them
            E_them = One_Pass.Nodes.E_them{Children_node(1)};
+%            %DM1
+%            for M = 1:Number_of_Function
+%                 for k = 1:nnz(Children_node) 
+%                     E_them(M) = max(E_them(M),One_Pass.Nodes.E_them{Children_node(1)}(M));
+%                 end
+%            end
+           %Minimax
            for M = 1:Number_of_Function
                 for k = 1:nnz(Children_node) 
                     E_them(M) = max(E_them(M),One_Pass.Nodes.E_them{Children_node(1)}(M));
                 end
            end
+           
            One_Pass.Nodes.E_them{list(j)} = E_them;
             
         end

@@ -1,4 +1,4 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset)
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunLeafLookAheadM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset)
 
 One_Pass = Tree;
 Number_of_Asset = size(Asset_Position,1);
@@ -30,7 +30,11 @@ for i = 2*T+1 :-1:1
                 One_Pass.Nodes.E_them{list(j)}(1,M+1) = E_them;
             end
             
+            %In leaf look ahead M1, just find the minial of reward value at
+            %the leaf node
+            
             One_Pass.Nodes.E_us(list(j)) = E_them; 
+            One_Pass.Nodes.E_them{list(j)} = min(One_Pass.Nodes.E_us(list(j)));
             One_Pass.Nodes.Decision_Node(list(j)) = list(j);
             
         end
@@ -40,7 +44,8 @@ for i = 2*T+1 :-1:1
             %Find which function we need to use based on the wise up state
             %of the opponent
 
-            Decision_Index_E_them = bin2dec(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}')+1;     
+%             Decision_Index_E_them = bin2dec(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}')+1;     
+            Decision_Index_E_them = 1;
             Best_value = One_Pass.Nodes.E_them{Children_node(1)}(Decision_Index_E_them);
             
             for k = 1:nnz(Children_node)
@@ -48,6 +53,9 @@ for i = 2*T+1 :-1:1
                     Best_value = One_Pass.Nodes.E_them{Children_node(k)}(Decision_Index_E_them);
                 end
             end
+            
+            
+            
 
            %Find the minimal value based on the wise up state of the
            %opponent 
@@ -144,7 +152,7 @@ for i = 2*T+1 :-1:1
            
            %Update E_them
            E_them = One_Pass.Nodes.E_them{Children_node(1)};
-           for M = 1:Number_of_Function
+           for M = 1:1
                 for k = 1:nnz(Children_node) 
                     E_them(M) = max(E_them(M),One_Pass.Nodes.E_them{Children_node(1)}(M));
                 end
