@@ -13,16 +13,16 @@ for i = 2*T+1 :-1:1
             E_them_temp = E_them;
             
             Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)}; %indicator to label which asset is collected along the path to this node
-            for M = 0:Number_of_Function-1
+            for Function_M = 0:Number_of_Function-1
                 E_them = E_them_temp;
-                Function_M = dec2bin(M,Function_index_size);
+%                 Function_M = dec2bin(M,Function_index_size);
 %                 Detection_Asset_Collect = One_Pass.Nodes.Detection_Asset_Collect{list(j)};
                 for N = Function_index_size:-1:1
-                    if Function_M(N) == '1' 
-                        E_them = E_them - str2double(Detection_Asset_Collect(N)) * Negtive_Asset;
+                    if bitand(Function_M, bitset(0,length(Asset_Position) - N + 1))
+                        E_them = E_them - Detection_Asset_Collect(N) * Negtive_Asset;
                     end      
                 end
-                One_Pass_Nodes_E_them(1,M+1) = E_them;
+                One_Pass_Nodes_E_them(1,Function_M+1) = E_them;
             end
             
             
@@ -34,13 +34,24 @@ for i = 2*T+1 :-1:1
     elseif ~mod(i,2) %MIN Level
         for j = 1:nnz(list)
 %             Children_node = successors(One_Pass,list(j));
+            
 
             Children_node = One_Pass.Nodes.Successors{list(j)};
             
             %Find which function we need to use based on the wise up state
             %of the opponent
+            Decision_Index_E_them = 0;
+            M = length(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)});
+            for CheckBit = 1:M
+                if One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}(CheckBit) == 1
+                    Decision_Index_E_them = bitset(Decision_Index_E_them,M - CheckBit + 1);       
+                end
+            end
+%             Decision_Index_E_them = bin2dec(num2str(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}'))+1;     
+            Decision_Index_E_them = Decision_Index_E_them + 1;
 
-            Decision_Index_E_them = bin2dec(num2str(One_Pass.Nodes.Detection_Asset_WiseUp_Index{list(j)}'))+1;     
+                
+                
             Best_value = One_Pass.Nodes.E_them{Children_node(1)}(Decision_Index_E_them);
             
             for k = 1:nnz(Children_node)
@@ -55,17 +66,19 @@ for i = 2*T+1 :-1:1
            P = list(j);
            for k = 1:nnz(Children_node)           
                 if One_Pass.Nodes.E_them{Children_node(k)}(Decision_Index_E_them) == Best_value
-                    Best_nodes(nnz(Best_nodes) + 1) = Children_node(k);
+                    Best_nodes(length(Best_nodes) + 1) = Children_node(k);
                 end             
            end
+           
+
            Best_node = Best_nodes(1);
            % get the minimal reward for current step
            if nnz(Best_nodes) > 1
                Best_one = 1;
                for B = 1:nnz(Best_nodes)
                    
-                   if One_Pass.Nodes.Opponent_x(Best_nodes(B)) == One_Pass.Nodes.Agent_x(P) &&...
-                           One_Pass.Nodes.Opponent_y(Best_nodes(B)) == One_Pass.Nodes.Agent_y(P)
+                   if One_Pass.Nodes.Opponent{Best_nodes(B)}(1) == One_Pass.Nodes.Agent{P}(1) &&...
+                           One_Pass.Nodes.Opponent{Best_nodes(B)}(1) == One_Pass.Nodes.Agent{P}(2)
                        Best_one = B;
                        break
                    elseif One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) < One_Pass.Nodes.Current_Step_reward(Best_nodes(Best_one))
@@ -122,8 +135,8 @@ for i = 2*T+1 :-1:1
 
            if nnz(Best_nodes) > 1 
                for k = 1:nnz(Best_nodes)
-                   if One_Pass.Nodes.Agent_x(i) == One_Pass.Nodes.Agent_x(Children_node(k)) &&...
-                           One_Pass.Nodes.Agent_y(i) == One_Pass.Nodes.Agent_y(Children_node(k))
+                   if One_Pass.Nodes.Agent{i}(1) == One_Pass.Nodes.Agent{Children_node(k)}(1) &&...
+                           One_Pass.Nodes.Agent{i}(2) == One_Pass.Nodes.Agent{Children_node(k)}(2)
                        Best_node = Best_nodes(k);
                        break
                    else                      
@@ -182,11 +195,11 @@ end
 % %find the optimal path
 
 for k =1:2:nnz(One_Pass_Node_path)
-    Agent_path_x((k+1)/2) = One_Pass.Nodes.Agent_x(One_Pass_Node_path(k));
-    Agent_path_y((k+1)/2) = One_Pass.Nodes.Agent_y(One_Pass_Node_path(k));
+    Agent_path_x((k+1)/2) = One_Pass.Nodes.Agent{One_Pass_Node_path(k)}(1);
+    Agent_path_y((k+1)/2) = One_Pass.Nodes.Agent{One_Pass_Node_path(k)}(2);
     
-    Opponent_path_x((k+1)/2) = One_Pass.Nodes.Opponent_x(One_Pass_Node_path(k));
-    Opponent_path_y((k+1)/2) = One_Pass.Nodes.Opponent_y(One_Pass_Node_path(k));
+    Opponent_path_x((k+1)/2) = One_Pass.Nodes.Opponent{One_Pass_Node_path(k)}(1);
+    Opponent_path_y((k+1)/2) = One_Pass.Nodes.Opponent{One_Pass_Node_path(k)}(2);
 end
 
 

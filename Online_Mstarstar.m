@@ -43,7 +43,7 @@ Record_path_Opponent = Initial_Opponent;
 
 % Teammate_appear_mod = 3;
 % Teammate_appear_mod_E_smart = 3;
-Detection_Asset_Collect = num2str(zeros(Number_of_Asset,1));
+Detection_Asset_Collect = zeros(Number_of_Asset,1);
 
 Negtive_Reward = 1;
 Negtive_Asset = 30;
