@@ -30,7 +30,7 @@ Y_MAX = environment_max_y+0.1*(environment_max_y-environment_min_y);
 %     
 % end
 
-Initial_Agent = [16;7];
+Initial_Agent = [19;7];
 Initial_Opponent = [16;5];
 
 Asset = [4 7; 16 10;17 10;16 4; 17 4];
@@ -52,7 +52,7 @@ Negtive_Asset = 30;
 Lookahead = 3;
 T = Lookahead;
 
-T_execution = 10;       % how many time steps to execute the online planner
+T_execution = 20;       % how many time steps to execute the online planner
 
 V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);
 Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),ENV_SIZE, ENV_SIZE);
@@ -77,7 +77,6 @@ for step = 1:T_execution
     Record_path_Agent(:,step + 1) = Initial_Agent;
     Record_path_Opponent(:,step + 1) = Initial_Opponent;
     Detection_Asset_Collect = Assets_Collected;
-    
 end
 
 %%

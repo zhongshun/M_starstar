@@ -1,6 +1,5 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(Tree,T,Asset_Position,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size)
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(One_Pass,T,Asset_Position,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size)
 
-One_Pass = Tree;
 
 for i = 2*T+1 :-1:1
     list =  find(One_Pass.Nodes.Generation == i);
@@ -35,7 +34,9 @@ for i = 2*T+1 :-1:1
         for j = 1:nnz(list)
 %             Children_node = successors(One_Pass,list(j));
             
-
+            if list(j) == 2
+                a = 1;
+            end
             Children_node = One_Pass.Nodes.Successors{list(j)};
             
             %Find which function we need to use based on the wise up state
@@ -144,6 +145,11 @@ for i = 2*T+1 :-1:1
                        for B = 1:nnz(Best_nodes)
                            if One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) > One_Pass.Nodes.Current_Step_reward(Best_nodes(Best_one))
                                Best_one = B;
+%                            elseif One_Pass.Nodes.Current_Step_reward(Best_nodes(B)) == One_Pass.Nodes.Current_Step_reward(Best_nodes(Best_one))
+%                                if norm(One_Pass.Nodes.Agent{Best_nodes(B)}-One_Pass.Nodes.Agent{1})...
+%                                        > norm(One_Pass.Nodes.Agent{Best_nodes(Best_one)}-One_Pass.Nodes.Opponent{1)
+%                                    Best_one = B;
+%                                end
                            end
                            Best_node = Best_nodes(Best_one);
                        end
@@ -202,10 +208,24 @@ for k =1:2:nnz(One_Pass_Node_path)
     Opponent_path_y((k+1)/2) = One_Pass.Nodes.Opponent{One_Pass_Node_path(k)}(2);
 end
 
+Initial_Agent = [Agent_path_x(1);Agent_path_y(1)];
+for k = 2:2:length(One_Pass_Node_path)
+    if Initial_Agent(1) ~= One_Pass.Nodes.Agent{One_Pass_Node_path(k)}(1) || Initial_Agent(2) ~= One_Pass.Nodes.Agent{One_Pass_Node_path(k)}(2)
+        Initial_Agent =  One_Pass.Nodes.Agent{One_Pass_Node_path(k)};
+        break;
+    end
+end
+Initial_Agent_Region = One_Pass.Nodes.Agent_Region{One_Pass_Node_path(k)};
 
-Initial_Agent = [Agent_path_x(2);Agent_path_y(2)];
-Initial_Opponent = [Opponent_path_x(2);Opponent_path_y(2)];
-Initial_Agent_Region = One_Pass.Nodes.Agent_Region{One_Pass_Node_path(3)};
-Assets_Collected = One_Pass.Nodes.Detection_Asset_Collect{One_Pass_Node_path(3)};
+
+Initial_Opponent = [Opponent_path_x(1);Opponent_path_y(1)];
+for k = 3:2:length(One_Pass_Node_path)
+    if Initial_Opponent(1) ~= One_Pass.Nodes.Opponent{One_Pass_Node_path(k)}(1)  || One_Pass.Nodes.Opponent{One_Pass_Node_path(k)}(2)
+        Initial_Opponent =  One_Pass.Nodes.Opponent{One_Pass_Node_path(k)};
+        break;
+    end
+end
+
+Assets_Collected = One_Pass.Nodes.Detection_Asset_Collect{One_Pass_Node_path(k)};
 
 end
