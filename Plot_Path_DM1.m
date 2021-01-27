@@ -73,7 +73,7 @@ sensor_y =  Record_path_Opponent(2,:);  %[10,9,8,7,7,7,7,7,6,5,4,5,6,7,6,5,4];
 
 Teammate = Asset; 
 Teammate_detected = zeros(1,5);
-TeammatePenalty = 30;
+TeammatePenalty = Negtive_Asset;
 Teammate_detected = zeros(size(Asset,1),1);
 
 

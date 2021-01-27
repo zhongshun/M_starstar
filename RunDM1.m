@@ -1,5 +1,6 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(One_Pass,T,Asset_Position,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region)
-
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(One_Pass,T,Asset_Position,Negtive_Reward,...
+                                                            Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region,Asset_Visibility_Data,step)
+epsilon = step;
 
 for i = 2*T+1 :-1:1
     list =  find(One_Pass.Nodes.Generation == i);
@@ -21,7 +22,7 @@ for i = 2*T+1 :-1:1
 %                     if bitand(Function_M, bitset(0,length(Asset_Position) - N + 1))
 %                     if   mod(bitshift(Function_M,-(length(Asset_Position) - N + 1)),2)
                     if  mod(Index,2)
-                        E_them = E_them - Detection_Asset_Collect(N) * Negtive_Asset;
+                        E_them = E_them - (Detection_Asset_Collect(N)>0) * (Negtive_Asset + 0.01*(100-Detection_Asset_Collect(N)));
                     end
                     Index = floor(Index/2);
                 end

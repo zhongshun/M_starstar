@@ -1,4 +1,5 @@
-function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(One_Pass,T,Asset_Position,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region)
+function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunDM1(One_Pass,T,Asset_Position,Negtive_Reward,...
+                                                            Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region,Asset_Visibility_Data,step)
 
 
 for i = 2*T+1 :-1:1
@@ -229,12 +230,12 @@ for k = 3:2:length(One_Pass_Node_path)
         break;
     end
 end
-Initial_chose = k;
-for K = k:2:length(One_Pass_Node_path)
-    if norm(One_Pass.Nodes.Opponent{One_Pass_Node_path(1)}-One_Pass.Nodes.Opponent{One_Pass_Node_path(K)}) == 1 &&      
-        Initial_Opponent =  One_Pass.Nodes.Opponent{One_Pass_Node_path(K)};
-    end
-end
+% Initial_chose = k;
+% for K = k:2:length(One_Pass_Node_path)
+%     if norm(One_Pass.Nodes.Opponent{One_Pass_Node_path(1)}-One_Pass.Nodes.Opponent{One_Pass_Node_path(K)}) == 1 &&      
+%         Initial_Opponent =  One_Pass.Nodes.Opponent{One_Pass_Node_path(K)};
+%     end
+% end
 
 Assets_Collected = One_Pass.Nodes.Detection_Asset_Collect{One_Pass_Node_path(k)};
 

@@ -6,7 +6,8 @@
 % Initial_Opponent = [0;0];
 % Obstacle_Set = [2 2 2 2 2;1 2 3 4 5];
 
-function Vis = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,Detection_Asset_Collect,environment,Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region)
+function Vis = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,Detection_Asset_Collect,environment,...
+                                    Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environment,step)
 
 Number_of_Asset = size(Asset,1);
 % Number_of_Function = 0;
@@ -163,7 +164,8 @@ for i = 2:2*T+1
                     % Min level will update detection times, both for the agent and the assets                  
 %                     W{1} = visibility_polygon( [Vis.Nodes.Opponent{Count+1}(1) Vis.Nodes.Opponent{Count+1}(2)] , environment , epsilon , snap_distance );
                     W{1} = Visibility_Data{Vis.Nodes.Opponent{Count+1}(1) + 100* Vis.Nodes.Opponent{Count+1}(2)};
-                    if in_environment( [Vis.Nodes.Agent{Count+1}(1) Vis.Nodes.Agent{Count+1}(2)] , W , epsilon )
+%                     if in_environment( [Vis.Nodes.Agent{Count+1}(1) Vis.Nodes.Agent{Count+1}(2)] , W , epsilon )
+                    if  Visibility_in_environment(Vis.Nodes.Agent{Count+1}(1) + 100* Vis.Nodes.Agent{Count+1}(2), Vis.Nodes.Opponent{Count+1}(1) + 100* Vis.Nodes.Opponent{Count+1}(2))
                         Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j) + 1;
                     else
                         Vis.Nodes.Agent_Detection_time(Count+1) = Vis.Nodes.Agent_Detection_time(j);
@@ -172,7 +174,8 @@ for i = 2:2*T+1
                     Vis.Nodes.Detection_Asset_WiseUp_Index(Count+1) = Vis.Nodes.Detection_Asset_WiseUp_Index(j);
                     for N = 1:Number_of_Asset
                         if Vis.Nodes.Detection_Asset_WiseUp_Index{Count+1}(N) == 0
-                            if in_environment( [Asset(N,1) Asset(N,2)] , W , epsilon )
+%                             if in_environment( [Asset(N,1) Asset(N,2)] , W , epsilon )
+                            if Asset_Visibility_Data(N, Vis.Nodes.Opponent{Count+1}(1) + 100* Vis.Nodes.Opponent{Count+1}(2)) == 1
                                 %                             Vis.Nodes.Detection_Asset_WiseUp_Index{Count+1}(N) = '1';
                                 Vis.Nodes.Detection_Asset_WiseUp_Index{Count+1}(N) = 1;
                             end
@@ -180,16 +183,18 @@ for i = 2:2*T+1
                     end
                     %Check if one assest was being collected
                     Vis.Nodes.Detection_Asset_Collect{Count+1} = Vis.Nodes.Detection_Asset_Collect{j};
+                    Extra = 0;
                     for N = 1:Number_of_Asset
-                        if  Asset(N,1) == Vis.Nodes.Opponent{Count+1}(1) &&  Asset(N,2) == Vis.Nodes.Opponent{Count+1}(2)
+                        if  Asset(N,1) == Vis.Nodes.Opponent{Count+1}(1) &&  Asset(N,2) == Vis.Nodes.Opponent{Count+1}(2) && Vis.Nodes.Detection_Asset_Collect{Count+1}(N) == 0
 %                             Vis.Nodes.Detection_Asset_Collect{Count+1}(N) = '1';
-                            Vis.Nodes.Detection_Asset_Collect{Count+1}(N) = 1;
+                            Vis.Nodes.Detection_Asset_Collect{Count+1}(N) = step + (i-1)/2;
 %                             Vis.Nodes.Asset_Collect_times(Count+1) =  Vis.Nodes.Asset_Collect_times(j) + 1;
+                            Extra = 100 - step;
                         end
                     end
                     
                     Vis.Nodes.Current_Step_reward(Count+1) =  nnz(Vis.Nodes.Agent_Region{Count+1}) - Negtive_Reward* Vis.Nodes.Agent_Detection_time(Count+1);
-                    Vis.Nodes.Current_Step_reward_with_assest(Count+1) =  Vis.Nodes.Current_Step_reward(Count+1) - Negtive_Asset * sum(Vis.Nodes.Detection_Asset_Collect{Count+1});                    
+                    Vis.Nodes.Current_Step_reward_with_assest(Count+1) =  Vis.Nodes.Current_Step_reward(Count+1) - Negtive_Asset * sum(Vis.Nodes.Detection_Asset_Collect{Count+1}) - 0.01*Extra;                    
                     Vis.Nodes.Generation(Count+1) = i;
                     Count = Count+1;
                 end
