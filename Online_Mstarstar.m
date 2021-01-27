@@ -14,10 +14,10 @@ epsilon = 0.000000001;
 % %Read environment geometry from file
 environment = read_vertices_from_file('./Environments/M_starstar12.environment');
 
-Initial_Agent = [12;5];
-Initial_Opponent = [12;4];
+Initial_Agent = [14;7];
+Initial_Opponent = [14;6];
 
-Asset = [4 7; 16 8;17 8;16 6; 17 6];
+Asset = [4 7; 16 10;17 10;16 4; 17 4];
 Number_of_Asset = size(Asset,1);
 
 
@@ -30,18 +30,18 @@ Record_path_Opponent = Initial_Opponent;
 Detection_Asset_Collect = zeros(Number_of_Asset,1);
 
 Negtive_Reward = 1;
-Negtive_Asset = 100;
+Negtive_Asset = 30;
 % WiseUp = 0;
 
       % how many time steps to execute the online planner
 
-Creat_Environment_Visbility_Data
+% Creat_Environment_Visbility_Data
 load('Save_Visibility_Data\M_starstar12.mat')
 
-Lookahead = 4;
+Lookahead = 3;
 T = Lookahead;
 
-T_execution = 20; 
+T_execution = 10; 
 
 V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);
 Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),ENV_SIZE1, ENV_SIZE2);
@@ -53,7 +53,7 @@ for i = 0:Number_of_Asset
 end
 Function_index = dec2bin(Number_of_Function-1);
 Function_index_size = size(Function_index,2);
-
+save('Save_Visibility_Data\Initial.mat')
 
 for step = 1:T_execution
     
@@ -69,6 +69,12 @@ for step = 1:T_execution
     Record_path_Agent(:,step + 1) = Initial_Agent;
     Record_path_Opponent(:,step + 1) = Initial_Opponent;
     Detection_Asset_Collect = Assets_Collected;
+%     save('Save_Visibility_Data\Running_data.mat','Record_path_Agent','Record_path_Opponent','Detection_Asset_Collect','Initial_Agent','Initial_Opponent','Initial_Agent_Region','step');
+%     
+%     clear
+%     load('Save_Visibility_Data\Initial.mat')
+%     load('Save_Visibility_Data\M_starstar12.mat')
+%     load('Save_Visibility_Data\Running_data.mat')
 end
 
 %%

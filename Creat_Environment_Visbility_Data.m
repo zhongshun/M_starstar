@@ -70,7 +70,7 @@ for x_location = floor(X_MIN):floor(X_MAX)+1
     for y_location = floor(Y_MIN):floor(Y_MAX)+1
         if in_environment( [x_location,y_location] , environment , epsilon )
             V{1} =  visibility_polygon( [x_location,y_location] , environment , epsilon, snap_distance);
-            display([x_location,y_location]);
+%             display([x_location,y_location]);
             for x_tosee = floor(X_MIN):floor(X_MAX)+1
                 for y_tosee = floor(Y_MIN):floor(Y_MAX)+1             
                     if in_environment( [x_tosee,y_tosee] , V , epsilon )
