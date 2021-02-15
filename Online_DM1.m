@@ -1,4 +1,5 @@
-clear all; close all; clc;
+clear all; 
+clc;
 %Robustness constant
 epsilon = 0.000000001;
 
@@ -14,10 +15,14 @@ epsilon = 0.000000001;
 % %Read environment geometry from file
 environment = read_vertices_from_file('./Environments/M_starstar12.environment');
 
-Initial_Agent = [14;7];
-Initial_Opponent = [14;6];
+% Initial_Agent = [12;9];
+% Initial_Opponent = [12;8];
+
+Initial_Agent = [17;7];
+Initial_Opponent = [17;6];
 
 Asset = [4 7; 16 10;17 10;16 4; 17 4];
+% Asset = [15 14; 17 12; 15 4; 7 6];
 Number_of_Asset = size(Asset,1);
 
 
@@ -34,18 +39,21 @@ Negtive_Asset = 30;
 % WiseUp = 0;
 
       % how many time steps to execute the online planner
+Resolution = 10;
 
-% Creat_Environment_Visbility_Data
-load('Save_Visibility_Data\M_starstar12.mat')
+Creat_Environment_Visbility_Data
+% load('Save_Visibility_Data\M_starstar12.mat')
 
-Lookahead = 3;
+Lookahead = 4;
 T = Lookahead;
 
 T_execution = 10; 
+Discount_factor =0.85;
+
 
 V{1} = visibility_polygon( [Initial_Agent(1) Initial_Agent(2)] , environment , epsilon, snap_distance);
-Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),ENV_SIZE1, ENV_SIZE2);
-
+Initial_Agent_Region = poly2mask(Resolution*V{1}(:,1),Resolution*V{1}(:,2),Resolution*ENV_SIZE1, Resolution*ENV_SIZE2);
+% Initial_Agent_Region = poly2mask(V{1}(:,1),V{1}(:,2),11, 24);
 Number_of_Asset = size(Asset,1);
 Number_of_Function = 0;
 for i = 0:Number_of_Asset
@@ -58,23 +66,40 @@ save('Save_Visibility_Data\Initial.mat')
 for step = 1:T_execution
     
     %% Build the tree
-    Tree = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,...
-            Detection_Asset_Collect,environment,Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environment,step);
+% %   
+%     if T_execution - step + 1  <= Lookahead
+%         Lookahead = T_execution - step + 1;
+%         T = Lookahead;
+%     end
+%     
+
+    Tree_Agent = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,...
+            Detection_Asset_Collect,environment,Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environment,step,Resolution,Discount_factor);
     %% Run the DM1 One Pass to back propagate the reward values
     %Change RunDM1 to RunLeafLookAhed or RunMinimax_multi_assets to run
     %other algorithms
-    [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = ...
-        RunDM1(Tree,T,Asset,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region,Asset_Visibility_Data,step);
-    %% Record the action for next step, also record the assets collected realdy
-    Record_path_Agent(:,step + 1) = Initial_Agent;
-    Record_path_Opponent(:,step + 1) = Initial_Opponent;
-    Detection_Asset_Collect = Assets_Collected;
-%     save('Save_Visibility_Data\Running_data.mat','Record_path_Agent','Record_path_Opponent','Detection_Asset_Collect','Initial_Agent','Initial_Opponent','Initial_Agent_Region','step');
+    
+    [Initial_Agent_update,Initial_Opponent1,Initial_Agent_Region_update,Assets_Collected_agent] = ...
+        RunDM1(Tree_Agent,T,Asset,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region,Asset_Visibility_Data,step,Discount_factor);
+    clear Tree_Agent;
 %     
-%     clear
-%     load('Save_Visibility_Data\Initial.mat')
-%     load('Save_Visibility_Data\M_starstar12.mat')
-%     load('Save_Visibility_Data\Running_data.mat')
+    %% Build the tree for the opponent 
+    Tree_Opponent = BuildMinimaxTree_BF(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,...
+            Detection_Asset_Collect,environment,Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environment,step,Resolution,Discount_factor);
+    
+    %% Run the Minimax
+    [Initial_Agent1,Initial_Opponent_update,Initial_Agent_Region_opponent,Assets_Collected] = ...
+        RunMinimax(Tree_Opponent,T,Asset,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region,Asset_Visibility_Data,step,Discount_factor);
+    clear Tree_Opponent;
+
+    %% Record the action for next step, also record the assets collected realdy
+    Record_path_Agent(:,step + 1) = Initial_Agent_update;
+    Record_path_Opponent(:,step + 1) = Initial_Opponent_update;
+    Initial_Agent = Initial_Agent_update;
+    Initial_Opponent = Initial_Opponent_update;
+    Initial_Agent_Region = Initial_Agent_Region_update;
+    Detection_Asset_Collect = Assets_Collected;
+
 end
 
 %%

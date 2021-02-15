@@ -7,7 +7,7 @@
 % Obstacle_Set = [2 2 2 2 2;1 2 3 4 5];
 
 function Vis = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,Detection_Asset_Collect,environment,...
-                                    Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environment,step)
+                                    Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environment,step,Resolution,Discount_factor)
 
 Number_of_Asset = size(Asset,1);
 % Number_of_Function = 0;
@@ -50,7 +50,7 @@ if in_environment( [Initial_Agent(1) Initial_Agent(2)] , W , epsilon )
 else
     Vis.Nodes.Agent_Detection_time = 0;
 end
-Vis.Nodes.Current_Step_reward = nnz(Vis.Nodes.Agent_Region{1}) - Negtive_Reward* Vis.Nodes.Agent_Detection_time(1);
+Vis.Nodes.Current_Step_reward = nnz(Vis.Nodes.Agent_Region{1})/Resolution^2 - Negtive_Reward* Vis.Nodes.Agent_Detection_time(1);
 % Vis.Nodes.Asset_Collect_times(1) = 0;
 
 
@@ -66,6 +66,7 @@ T = Lookahead;
 New_Initial = 1;
 New_End = 1;
 Count = 1;
+% Discount_factor = 1;
 
 
 % environment_min_x = min(environment{1}(:,1));
@@ -78,6 +79,9 @@ Action_Space = [1 0;0 1;-1 0; 0 -1;0 0];
 %% Start to build the search tree using breadth first expand
 for i = 2:2*T+1
 %     Current_step = ceil(i/2);
+%     Negtive_Reward = (0.99^(i-1))*Negtive_Reward;
+%     Negtive_Asset = (0.99^(i-1))*Negtive_Asset;
+    
     Initial_node = New_Initial;
     End_node = New_End;
 
@@ -117,10 +121,15 @@ for i = 2:2*T+1
                     V{1} = Visibility_Data{Vis.Nodes.Agent{Count+1}(1) + 100*Vis.Nodes.Agent{Count+1}(2)};
 %                     V{1} = visibility_polygon( [Vis.Nodes.Agent{Count+1}(1) Vis.Nodes.Agent{Count+1}(2)] , environment , epsilon , snap_distance );
 %                     Vis.Nodes.Agent_Region{Count+1} = poly2mask(V{1}(:,1),V{1}(:,2),50, 50) | Vis.Nodes.Agent_Region{j};
-                    Vis.Nodes.Agent_Region{Count+1} = Region{Vis.Nodes.Agent{Count+1}(1) + 100*Vis.Nodes.Agent{Count+1}(2)} | Vis.Nodes.Agent_Region{j};
+                     Vis.Nodes.Agent_Region{Count+1} =  Vis.Nodes.Agent_Region{j};
                     
-                    Vis.Nodes.Current_Step_reward(Count+1) =  nnz(Vis.Nodes.Agent_Region{Count+1}) - Negtive_Reward* Vis.Nodes.Agent_Detection_time(Count+1);
-                    Vis.Nodes.Current_Step_reward_with_assest(Count+1) =  Vis.Nodes.Current_Step_reward(Count+1) - Negtive_Asset * sum(Vis.Nodes.Detection_Asset_Collect{Count+1});
+%                     Vis.Nodes.Current_Step_reward(Count+1) =  nnz(Vis.Nodes.Agent_Region{Count+1}) - Negtive_Reward* Vis.Nodes.Agent_Detection_time(Count+1);
+                    Vis.Nodes.Current_Step_reward(Count+1) =   Vis.Nodes.Current_Step_reward(j);
+                    %Add Discount factor
+                    
+%                     Vis.Nodes.Current_Step_reward_with_assest(Count+1) =  Vis.Nodes.Current_Step_reward_with_assest(j);
+                    
+                    
 
                     Vis.Nodes.Generation(Count+1) = i;
                     Count = Count+1;
@@ -156,7 +165,7 @@ for i = 2:2*T+1
                     % Agent's position is the same as its parent node
                     Vis.Nodes.Agent{Count+1} = Vis.Nodes.Agent{j};
                     Vis.Nodes.Opponent{Count+1} = [Vis.Nodes.Opponent{j}(1)+Action_Space(actions,1); Vis.Nodes.Opponent{j}(2)+Action_Space(actions,2)];
-                    Vis.Nodes.Agent_Region{Count+1} = Vis.Nodes.Agent_Region{j};
+                     Vis.Nodes.Agent_Region{Count+1} = Region{Vis.Nodes.Agent{Count+1}(1) + 100*Vis.Nodes.Agent{Count+1}(2)} | Vis.Nodes.Agent_Region{j};
 %                     Vis.Nodes.Asset_Collect_times(Count+1) = Vis.Nodes.Asset_Collect_times(j);
                     
 %                     Vis.Nodes.Parent(Count+1) = j;
@@ -183,18 +192,32 @@ for i = 2:2*T+1
                     end
                     %Check if one assest was being collected
                     Vis.Nodes.Detection_Asset_Collect{Count+1} = Vis.Nodes.Detection_Asset_Collect{j};
-                    Extra = 0;
                     for N = 1:Number_of_Asset
                         if  Asset(N,1) == Vis.Nodes.Opponent{Count+1}(1) &&  Asset(N,2) == Vis.Nodes.Opponent{Count+1}(2) && Vis.Nodes.Detection_Asset_Collect{Count+1}(N) == 0
 %                             Vis.Nodes.Detection_Asset_Collect{Count+1}(N) = '1';
                             Vis.Nodes.Detection_Asset_Collect{Count+1}(N) = step + (i-1)/2;
 %                             Vis.Nodes.Asset_Collect_times(Count+1) =  Vis.Nodes.Asset_Collect_times(j) + 1;
-                            Extra = 100 - step;
                         end
                     end
                     
-                    Vis.Nodes.Current_Step_reward(Count+1) =  nnz(Vis.Nodes.Agent_Region{Count+1}) - Negtive_Reward* Vis.Nodes.Agent_Detection_time(Count+1);
-                    Vis.Nodes.Current_Step_reward_with_assest(Count+1) =  Vis.Nodes.Current_Step_reward(Count+1) - Negtive_Asset * sum(Vis.Nodes.Detection_Asset_Collect{Count+1}) - 0.01*Extra;                    
+%                     Vis.Nodes.Current_Step_reward(Count+1) =  nnz(Vis.Nodes.Agent_Region{Count+1}) - Negtive_Reward* Vis.Nodes.Agent_Detection_time(Count+1);
+                    
+                    %Add discount factor
+                    r =  (nnz(Vis.Nodes.Agent_Region{Count+1}) - nnz(Vis.Nodes.Agent_Region{j})) / (Resolution)^2 - Negtive_Reward * (Vis.Nodes.Agent_Detection_time(Count+1) - Vis.Nodes.Agent_Detection_time(j)) ;
+                    
+                    Vis.Nodes.Current_Step_reward(Count+1) =  Vis.Nodes.Current_Step_reward(j) + Discount_factor^((i-1)/2)*r;
+                    
+%                     $$ R = \sum_{i=0}^T  \gamma^i * r(i)$$
+%                     $$ r(i) = (region(i) - region(i-1)) - (whether detected or not)$$
+                    
+%                     for N = 1:Number_of_Asset
+%                         Vis.Nodes.Current_Step_reward_with_assest(Count+1) =  Vis.Nodes.Current_Step_reward_with_assest(Count+1) - Negtive_Asset * (Vis.Nodes.Detection_Asset_Collect{Count+1}(N)>0);
+%                     end
+%                     
+%                     %Add discount factor
+%                     Vis.Nodes.Current_Step_reward_with_assest(Count+1) =   Vis.Nodes.Current_Step_reward_with_assest(j) +...
+%                                         Discount_factor*(Vis.Nodes.Current_Step_reward_with_assest(Count+1) - Vis.Nodes.Current_Step_reward_with_assest(j)); 
+                                    
                     Vis.Nodes.Generation(Count+1) = i;
                     Count = Count+1;
                 end

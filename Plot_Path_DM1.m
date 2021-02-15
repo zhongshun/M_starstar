@@ -1,22 +1,3 @@
-%
-%=========VisiLibity Demonstration Script=========
-%
-%This script uses the the MEX-files generated from
-%visibility_polygon.cpp and in_environment.cpp.  Follow
-%the instructions in the respective .cpp files to create
-%these MEX-files before running this script. A graphical
-%representation of the supplied environment file
-%example1.environment is dislplayed and the user can
-%then select points (must be in the environment) with
-%the mouse and the visibility polygon of that point will
-%be computed and plotted over the environment.
-%
-
-
-%Clear the desk
-% clear all; close all; clc;
-% format long;
-% 
 load('Online.mat');
 
 
@@ -47,28 +28,15 @@ end
 
 
 
-%Select test points and plot resulting visibility polygon
 
-% current_x =[2,3,4,3,3,2,1,1,2,2,3,4,5,5,6,7,7,7]; % 
-% current_y =[14,14,14,14,13,13,13,12,12,13,13,13,13,14,14,14,15,16];
 
-% current_x = [4,4,4,5,6,7,6,7,6,7,6,7,6]; % 
-% current_y = [6,7,8,8,8,8,8,8,8,8,8,8,8];
-% 
-% sensor_x = [4,4,4,4,5,6,7,6,7,6,7,6,7];
-% sensor_y = [9,8,7,8,8,8,8,8,8,8,8,8,8];
+current_x = Record_path_Agent(1,:);    
+current_y = Record_path_Agent(2,:);     
 
-current_x = Record_path_Agent(1,:);     %[5,4,3,2,1,1,1,2,3,3,3,4,5,6,7,8,8];
-current_y = Record_path_Agent(2,:);     %[7,7,7,7,7,6,5,5,5,4,3,3,3,3,3,3,4];
+sensor_x =  Record_path_Opponent(1,:); 
+sensor_y =  Record_path_Opponent(2,:);  
 
-sensor_x =  Record_path_Opponent(1,:);  %[5, 5,5,5,4,3,2,1,1,1,1,1,1,1,1,1,1];
-sensor_y =  Record_path_Opponent(2,:);  %[10,9,8,7,7,7,7,7,6,5,4,5,6,7,6,5,4];
 
-% current_x = [13,13,13,13,13,14,15,15];
-% current_y = [ 5, 6, 7, 8, 9, 9, 9,10];
-% 
-% sensor_x =  [12,13,13,13,13,13,14,15];
-% sensor_y =  [ 8, 8, 7, 7, 8, 9, 9, 9];
 
 
 Teammate = Asset; 
@@ -76,10 +44,13 @@ Teammate_detected = zeros(1,5);
 TeammatePenalty = Negtive_Asset;
 Teammate_detected = zeros(size(Asset,1),1);
 
+Updated_Negtive_Reward = Negtive_Reward;
 
-Total_scan = false(50,50);
+
+
+% Total_scan = false(Resolution*ENV_SIZE1, Resolution*ENV_SIZE2);
 reward_step = 0;
-Total_scan = false(50,50);
+Total_scan = false(Resolution*ENV_SIZE1, Resolution*ENV_SIZE2);
 reward_step = 0;
 CurrentPenalty = 0;
 
@@ -106,7 +77,9 @@ end
 
 for ii= 1: max(size(current_x))
     
-
+    TeammatePenalty = Negtive_Asset;
+    Updated_Negtive_Reward = Negtive_Reward;
+    
     observer_x = current_x(ii);
     observer_y = current_y(ii);
     %Make sure the current point is in the environment
@@ -192,10 +165,10 @@ for ii= 1: max(size(current_x))
         %%overlap area
         x1= V{1}(:,1);
         y1= V{1}(:,2);
-        b1 = poly2mask(x1,y1,50, 50);
+        b1 = poly2mask(Resolution*x1,Resolution*y1,Resolution*ENV_SIZE1, Resolution*ENV_SIZE2);
         areaImage = bwarea(b1);
         Total_scan = b1 | Total_scan;
-        reward_step(ii) = bwarea(Total_scan);
+        reward_step(ii) = bwarea(Total_scan)/Resolution^2;
         
 
         
@@ -206,7 +179,7 @@ for ii= 1: max(size(current_x))
     
     
     if  in_environment( [sensor_x(ii) sensor_y(ii)] , V , epsilon )
-        sensor_detect_indicator(ii) = 1;
+        sensor_detect_indicator(ii) = Updated_Negtive_Reward;
     else
         sensor_detect_indicator(ii)= 0;
     end
@@ -221,11 +194,11 @@ for ii= 1: max(size(current_x))
         txt3 = ['Agent Observation: Total Penalty = ',num2str(sum(sensor_detect_indicator(1:ii))),', Current Penalty =', num2str(sensor_detect_indicator(ii))];
         text(X_MIN+4,Y_MAX+3,txt3,'FontSize',20)
         
-        txt4 = ['Assets Captured: Total Penalty = ',num2str(TeammatePenalty*sum(Teammate_detected(1:5))),', Current Penalty =', num2str(TeammatePenalty*CurrentPenalty)];
+        txt4 = ['Assets Captured: Total Penalty = ',num2str(TeammatePenalty*sum(Teammate_detected)),', Current Penalty =', num2str(TeammatePenalty*CurrentPenalty)];
         text(X_MIN+4,Y_MAX+2,txt4,'FontSize',20)
         
         txt5 = ['Combined: Total Reward = ',num2str(reward_step(ii)- sum(sensor_detect_indicator(1:ii))...
-            -(TeammatePenalty*sum(Teammate_detected(1:5)))),', Current Reward =', num2str(reward_step(ii) - reward_step(ii-1)- ...
+            -(TeammatePenalty*sum(Teammate_detected))),', Current Reward =', num2str(reward_step(ii) - reward_step(ii-1)- ...
             (sensor_detect_indicator(ii)) - (TeammatePenalty*CurrentPenalty))];
         text(X_MIN+4,Y_MAX+1,txt5,'FontSize',20)
         
