@@ -7,7 +7,7 @@
 % Obstacle_Set = [2 2 2 2 2;1 2 3 4 5];
 
 function Vis = BuildMinimaxTree_BF2(Initial_Agent,Initial_Opponent,Initial_Agent_Region,Asset,Detection_Asset_Collect,environment,...
-                                    Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environment,step,Resolution,Discount_factor)
+                                    Lookahead,Negtive_Reward,Negtive_Asset,Visibility_Data,Region,WiseUp_Index,Asset_Visibility_Data,Visibility_in_environment,step,Resolution,Discount_factor)
 
 Number_of_Asset = size(Asset,1);
 % Number_of_Function = 0;
@@ -34,7 +34,11 @@ Vis.Nodes.Successors{1} = [];
 
 % Vis.Nodes.Visited_Time = 1;
 % Vis.Nodes.Detection_Asset_WiseUp_Index{1} = num2str(zeros(Number_of_Asset,1));
-Vis.Nodes.Detection_Asset_WiseUp_Index{1} = zeros(Number_of_Asset,1);
+
+% Use this to change it to Overestimate case
+% Vis.Nodes.Detection_Asset_WiseUp_Index{1} = ones(Number_of_Asset,1);
+
+Vis.Nodes.Detection_Asset_WiseUp_Index{1} = WiseUp_Index;
 
 Vis.Nodes.Detection_Asset_Collect{1} = Detection_Asset_Collect;
 

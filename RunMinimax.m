@@ -1,5 +1,5 @@
 function [Initial_Agent,Initial_Opponent,Initial_Agent_Region,Assets_Collected] = RunMinimax(Minimax_Pass,T,Asset_Position,Negtive_Reward,...
-    Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region,Asset_Visibility_Data,step,Discount_factor)
+    Negtive_Asset,Number_of_Function,Function_index_size,Visibility_Data,Region,Asset_Visibility_Data,Visibility_in_environmentstep,step,Discount_factor)
 
 % RunDM1(Tree,T,Asset,Negtive_Reward,Negtive_Asset,Number_of_Function,Function_index_size,
 % Visibility_Data,Region,Asset_Visibility_Data,step)
@@ -174,6 +174,8 @@ Initial_Opponent = [Opponent_path_x(2);Opponent_path_y(2)];
 
 
 Assets_Collected = Minimax_Pass.Nodes.Detection_Asset_Collect{One_Pass_Node_path(3)};
+
+
 save('Save_Visibility_Data\Show_Tree.mat');
 Plot_Path_Online;
 end
